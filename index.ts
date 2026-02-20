@@ -134,12 +134,12 @@ function printResults(result: ComparisonResult): void {
   console.log("=".repeat(60));
 
   if (result.uniqueInA.length > 0) {
-    console.log(`\n📁 Unique in Folder A (${result.uniqueInA.length}):`);
+    console.log(`\n Unique in Folder A (${result.uniqueInA.length}):`);
     result.uniqueInA.forEach((file) => console.log(`  - ${file}`));
   }
 
   if (result.common.length > 0) {
-    console.log(`\n✓ Common files (${result.common.length}):`);
+    console.log(`\n Common files (${result.common.length}):`);
     result.common.forEach((file) => console.log(`  - ${file}`));
   }
 
