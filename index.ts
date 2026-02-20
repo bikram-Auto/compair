@@ -110,17 +110,17 @@ function printResults(result: ComparisonResult): void {
   }
 
   if (result.uniqueInB.length > 0) {
-    console.log(`\n📁 Unique in Folder B (${result.uniqueInB.length}):`);
+    console.log(`\n Unique in Folder B (${result.uniqueInB.length}):`);
     result.uniqueInB.forEach((file) => console.log(`  - ${file}`));
   }
 
   if (result.copiedFiles.length > 0) {
-    console.log(`\n✅ Successfully copied files (${result.copiedFiles.length}):`);
+    console.log(`\n Successfully copied files (${result.copiedFiles.length}):`);
     result.copiedFiles.forEach((file) => console.log(`  - ${file}`));
   }
 
   if (result.errors.length > 0) {
-    console.log(`\n❌ Errors (${result.errors.length}):`);
+    console.log(`\n Errors (${result.errors.length}):`);
     result.errors.forEach((error) => console.log(`  - ${error}`));
   }
 

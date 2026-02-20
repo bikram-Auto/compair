@@ -4,12 +4,12 @@ A TypeScript script that compares two folders and copies unique files from the s
 
 ## Features
 
-- ✅ Compares files in two folders
-- ✅ Identifies unique files in each folder
-- ✅ Identifies common files
-- ✅ Automatically copies unique files from source to destination
-- ✅ Detailed comparison report
-- ✅ Error handling with clear messages
+-  Compares files in two folders
+-  Identifies unique files in each folder
+-  Identifies common files
+-  Automatically copies unique files from source to destination
+-  Detailed comparison report
+-  Error handling with clear messages
 
 ## Installation
 
@@ -63,11 +63,11 @@ This will only show the comparison report without copying any files.
 
 The script generates a detailed report showing:
 
-- 📁 **Unique in Folder A**: Files that exist only in the source folder
-- ✓ **Common files**: Files that exist in both folders
-- 📁 **Unique in Folder B**: Files that exist only in the destination folder
-- ✅ **Successfully copied files**: Files that were copied from A to B
-- ❌ **Errors**: Any errors that occurred during the process
+-  **Unique in Folder A**: Files that exist only in the source folder
+-  **Common files**: Files that exist in both folders
+-  **Unique in Folder B**: Files that exist only in the destination folder
+-  **Successfully copied files**: Files that were copied from A to B
+-  **Errors**: Any errors that occurred during the process
 
 ## Example Output
 
@@ -79,19 +79,19 @@ Folder A (Source): ./source
 Folder B (Destination): ./backup
 ============================================================
 
-📁 Unique in Folder A (2):
+ Unique in Folder A (2):
   - file1.txt
   - file2.pdf
 
-✓ Common files (3):
+ Common files (3):
   - readme.md
   - config.json
   - data.csv
 
-📁 Unique in Folder B (1):
+ Unique in Folder B (1):
   - extra_file.txt
 
-✅ Successfully copied files (2):
+ Successfully copied files (2):
   - file1.txt
   - file2.pdf
 
