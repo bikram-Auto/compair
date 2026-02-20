@@ -1,0 +1,25 @@
+{
+  "name": "folder-compair",
+  "version": "1.0.0",
+  "description": "Compare two folders and copy unique files from source to destination",
+  "keywords": [
+    "folder",
+    "compare",
+    "copy",
+    "sync"
+  ],
+  "license": "MIT",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node index.ts",
+    "build": "tsc",
+    "dev": "ts-node index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  }
+}
