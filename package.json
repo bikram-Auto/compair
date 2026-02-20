@@ -9,13 +9,14 @@
     "sync"
   ],
   "license": "MIT",
-  "author": "",
+  "author": "Bikram-dev",
   "type": "commonjs",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "bin": "dist/index.js",
   "scripts": {
     "start": "ts-node index.ts",
     "build": "tsc",
-    "dev": "ts-node index.ts"
+    "dev": "ts-node index.ts --watch"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

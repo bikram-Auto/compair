@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Folder Compair - macOS/Linux executable wrapper
+# This script runs the Folder Compair tool
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Run the compiled JavaScript with Node.js
+node "$PROJECT_DIR/dist/index.js" "$@"
