@@ -11,6 +11,41 @@ interface ComparisonResult {
   errors: string[];
 }
 
+/**
+ * Recursively get all files from a folder and its nested subfolders
+ * Returns relative paths from the root folder (e.g., "subfolder/file.txt")
+ */
+function getAllFilesRecursive(folderPath: string, relativePath: string = ""): string[] {
+  const files: string[] = [];
+
+  try {
+    const entries = fs.readdirSync(folderPath);
+
+    for (const entry of entries) {
+      const fullPath = path.join(folderPath, entry);
+      const relPath = relativePath ? path.join(relativePath, entry) : entry;
+
+      try {
+        const stat = fs.statSync(fullPath);
+        if (stat.isFile()) {
+          files.push(relPath);
+        } else if (stat.isDirectory()) {
+          // Recursively get files from subdirectories
+          const nestedFiles = getAllFilesRecursive(fullPath, relPath);
+          files.push(...nestedFiles);
+        }
+      } catch (error) {
+        // Skip entries that can't be accessed
+        console.warn(`Warning: Could not access ${entry}`);
+      }
+    }
+  } catch (error) {
+    console.warn(`Warning: Could not read directory ${folderPath}`);
+  }
+
+  return files;
+}
+
 async function compareFolders(
   folderA: string,
   folderB: string,
@@ -38,17 +73,9 @@ async function compareFolders(
       return result;
     }
 
-    // Get list of files in each folder
-    const filesA = fs
-      .readdirSync(folderA)
-      .filter(
-        (file) => fs.statSync(path.join(folderA, file)).isFile()
-      );
-    const filesB = fs
-      .readdirSync(folderB)
-      .filter(
-        (file) => fs.statSync(path.join(folderB, file)).isFile()
-      );
+    // Get list of all files (including nested) from each folder
+    const filesA = getAllFilesRecursive(folderA);
+    const filesB = getAllFilesRecursive(folderB);
 
     const filesASet = new Set(filesA);
     const filesBSet = new Set(filesB);
@@ -74,6 +101,13 @@ async function compareFolders(
         try {
           const srcPath = path.join(folderA, file);
           const destPath = path.join(folderB, file);
+          
+          // Create parent directories if they don't exist
+          const destDir = path.dirname(destPath);
+          if (!fs.existsSync(destDir)) {
+            fs.mkdirSync(destDir, { recursive: true });
+          }
+          
           fs.copyFileSync(srcPath, destPath);
           result.copiedFiles.push(file);
           console.log(`✓ Copied: ${file}`);
