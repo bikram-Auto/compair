@@ -1,175 +1,239 @@
 ================================================================================
-🎯 SINGLE FILE EXECUTABLE - FOLDER COMPAIR
+STANDALONE EXECUTABLES - BUILD & DISTRIBUTION GUIDE
 ================================================================================
 
-You now have SINGLE FILE EXECUTABLES that include everything!
+This guide explains how to use and build standalone executables that work
+on any system without requiring Node.js to be installed.
+
+Two distribution options available in COMPAIR/ folder:
+  ✓ compair-standalone-macos (44 MB) - macOS ARM64
+  ✓ compair-standalone-linux (44 MB) - Linux x64
+  ✓ compair-standalone-windows.exe (36 MB) - Windows x64
 
 ================================================================================
-📦 YOUR FILES
-================================================================================
-
-EXECUTABLE FILES (Choose one):
-
-✨ compair-single-file (7.8 KB) - RECOMMENDED
-   • macOS / Linux executable
-   • No extension needed
-   • Just copy and run!
-   • Usage: ./compair-single-file /source /destination
-
-   compair-standalone-single.js (7.8 KB)
-   • Same as above, but in .js format
-   • Usage: node compair-standalone-single.js /source /destination
-   • Or: ./compair-standalone-single.js /source /destination
-
-   compair-single.bat
-   • Windows batch wrapper
-   • Copy with compair-standalone-single.js to same folder
-   • Usage: compair-single.bat C:\source C:\destination
-
-================================================================================
-⚡ 30-SECOND QUICK START
+🚀 QUICK START - USING STANDALONE EXECUTABLES
 ================================================================================
 
 macOS / Linux:
-  chmod +x compair-single-file
-  ./compair-single-file /path/to/source /path/to/destination
+  chmod +x compair-standalone-macos
+  ./compair-standalone-macos /path/to/source /path/to/destination
 
 Windows:
-  compair-single.bat C:\path\to\source C:\path\to\destination
+  compair-standalone-windows.exe C:\path\to\source C:\path\to\destination
+
+That's it! No Node.js installation needed!
+
+================================================================================
+🔨 HOW TO BUILD STANDALONE EXECUTABLES FOR MULTI-OS
+================================================================================
+
+Prerequisites:
+  • Node.js 20+ installed
+  • macOS, Linux, or Windows development machine
+  • pkg tool (for creating standalone binaries)
+
+Step 1: Install Dependencies
+  npm install
+
+Step 2: Build TypeScript
+  npm run build
+  # Compiles TypeScript to JavaScript in dist/ folder
+
+Step 3: Bundle with ncc (Optional - for lightweight version)
+  npm run bundle
+  # Creates dist/bundled/index.js (6.9 KB)
+
+Step 4: Build Standalone Executables with pkg
+  
+  Option A: Build for current platform only
+    npm install -g pkg
+    pkg dist/bundled/index.js --output compair-standalone-$(uname -s)
+    
+  Option B: Build for all platforms (macOS/Linux/Windows)
+    npm install -g pkg
+    pkg dist/bundled/index.js \
+      --targets node18-macos-arm64,node18-linux-x64,node18-win-x64 \
+      --output dist/compair
+    
+    This creates:
+      • dist/compair-macos-arm64 (44 MB)
+      • dist/compair-linux-x64 (44 MB)
+      • dist/compair-win-x64.exe (36 MB)
+
+Step 5: Make Executable (macOS/Linux)
+  chmod +x dist/compair-macos-arm64
+  chmod +x dist/compair-linux-x64
+
+Step 6: Test the Executable
+  ./dist/compair-macos-arm64 /source /dest --no-copy
+  ./dist/compair-linux-x64 /source /dest --no-copy
+
+Step 7: Copy to Distribution Folder
+  cp dist/compair-macos-arm64 COMPAIR/compair-standalone-macos
+  cp dist/compair-linux-x64 COMPAIR/compair-standalone-linux
+  cp dist/compair-win-x64.exe COMPAIR/compair-standalone-windows.exe
+
+================================================================================
+📋 COMPLETE BUILD SCRIPT (All in One)
+================================================================================
+
+#!/bin/bash
+# Build standalone executables for macOS, Linux, Windows
+
+echo "Step 1: Installing dependencies..."
+npm install
+
+echo "Step 2: Building TypeScript..."
+npm run build
+
+echo "Step 3: Bundling with ncc..."
+npm run bundle
+
+echo "Step 4: Installing pkg globally..."
+npm install -g pkg
+
+echo "Step 5: Building standalone executables for all platforms..."
+pkg dist/bundled/index.js \
+  --targets node18-macos-arm64,node18-linux-x64,node18-win-x64 \
+  --output dist/compair
+
+echo "Step 6: Making files executable..."
+chmod +x dist/compair-macos-arm64
+chmod +x dist/compair-linux-x64
+
+echo "Step 7: Copying to COMPAIR/ folder..."
+cp dist/compair-macos-arm64 COMPAIR/compair-standalone-macos
+cp dist/compair-linux-x64 COMPAIR/compair-standalone-linux
+cp dist/compair-win-x64.exe COMPAIR/compair-standalone-windows.exe
+
+echo "Step 8: Verifying..."
+ls -lh COMPAIR/compair-standalone-*
+
+echo "✓ Build complete! Standalone executables ready in COMPAIR/ folder"
 
 ================================================================================
 🎯 USAGE EXAMPLES
 ================================================================================
 
 Compare and Copy Unique Files:
-  ./compair-single-file /source /destination
+  ./compair-standalone-macos /source /destination
 
 Preview Only (Don't Copy):
-  ./compair-single-file /source /destination --no-copy
+  ./compair-standalone-macos /source /destination --no-copy
 
 Full Sync (DELETE destination, then copy source):
-  ./compair-single-file /source /destination --sync
+  ./compair-standalone-macos /source /destination --sync
 
 Show Help:
-  ./compair-single-file
+  ./compair-standalone-macos
 
 ================================================================================
-💾 DEPLOYMENT - HOW TO USE ON OTHER MACHINES
+💾 DEPLOYMENT OPTIONS
 ================================================================================
 
-Option 1: Local Machine
-  chmod +x compair-single-file
-  ./compair-single-file ~/Documents ~/Backup
+Option 1: Email / USB Drive
+  • Simply copy compair-standalone-macos (or .exe for Windows)
+  • No installation needed
+  • User just runs: ./compair-standalone-macos /src /dst
 
-Option 2: Transfer to Another Machine
-  scp compair-single-file user@other-machine:~/
-  # On their machine:
-  chmod +x ~/compair-single-file
-  ~/compair-single-file ~/source ~/destination
+Option 2: Download URL
+  • Host executable on your server
+  • Users download and run directly
+  • Works across all platforms
 
-Option 3: Email/Compress for Transfer
-  tar -czf compair.tar.gz compair-single-file
-  # Email/transfer the file
-  # On receiving machine:
-  tar -xzf compair.tar.gz
-  chmod +x compair-single-file
-  ./compair-single-file /source /destination
+Option 3: Package Manager (Future)
+  • Could be packaged for Homebrew, apt, etc.
+  • One command install and use
 
-Option 4: Global Access (macOS/Linux)
-  sudo cp compair-single-file /usr/local/bin/compair
-  compair /any/source /any/destination
-
-Option 5: Windows System Deployment
-  # Copy compair-single.bat and compair-standalone-single.js to C:\tools\
-  # Add C:\tools\ to system PATH
-  # Use from anywhere: compair-single.bat
+Option 4: Script Distribution
+  • Embed in shell scripts or batch files
+  • Automatic download and execution
 
 ================================================================================
-📊 WHAT YOU'RE GETTING
+📊 BUILD DETAILS
 ================================================================================
 
-File Size:          7.8 KB (tiny!)
-Type:               Single self-contained executable
-All Code:           Yes (fully bundled)
-All Dependencies:   Yes (included)
-External Deps:      Node.js 20+ only
-Platforms:          macOS, Linux, Windows
-Setup:              Just copy the file!
+What pkg does:
+  1. Takes bundled JavaScript (6.9 KB)
+  2. Includes Node.js 18 runtime (~42 MB compressed)
+  3. Creates native executable for target OS
+  4. Result: Complete standalone executable
+
+File sizes:
+  • macOS ARM64: 44 MB (includes Node.js + code)
+  • Linux x64: 44 MB (includes Node.js + code)
+  • Windows x64: 36 MB (includes Node.js + code)
+
+Target platforms supported:
+  • node18-macos-arm64 (Apple Silicon / M1+)
+  • node18-macos-x64 (Intel Macs - if needed)
+  • node18-linux-x64 (Linux 64-bit)
+  • node18-win-x64 (Windows 64-bit)
+
+Build time per platform: ~2-3 minutes
+Total build time for all 3 platforms: ~10 minutes
 
 ================================================================================
-✨ KEY FEATURES
-================================================================================
-
-✅ SINGLE FILE              - Just one file, nothing else
-✅ TINY (7.8 KB)            - Super small
-✅ COMPLETE                 - All code included
-✅ PORTABLE                 - Works anywhere with Node.js
-✅ NO UNPACKING             - Run immediately
-✅ NO NPM INSTALL NEEDED    - Already bundled
-✅ NO BUILD NEEDED          - Just execute
-✅ CROSS-PLATFORM           - macOS, Linux, Windows
-
-================================================================================
-🔒 SAFETY GUIDE - IMPORTANT!
+🔐 SAFETY GUIDE - IMPORTANT!
 ================================================================================
 
 THREE MODES:
 
 1. SAFE MODE (Default)
-   ./compair-single-file /source /destination
+   ./compair-standalone-macos /source /destination
    → Copies unique files only
    → Your destination files are never deleted
    → SAFE TO USE ✅
 
 2. PREVIEW MODE (Safest)
-   ./compair-single-file /source /destination --no-copy
+   ./compair-standalone-macos /source /destination --no-copy
    → Shows what WOULD be done
    → Nothing is actually copied
    → SAFEST TO USE ✅
 
 3. SYNC MODE (Dangerous!)
-   ./compair-single-file /source /destination --sync
+   ./compair-standalone-macos /source /destination --sync
    → DELETE ALL files in destination
    → Then copy everything from source
    → ONLY USE IF YOU'RE SURE ⚠️
 
 BEST PRACTICE:
 Step 1: Always preview first
-  ./compair-single-file /source /destination --no-copy
+  ./compair-standalone-macos /source /destination --no-copy
 
 Step 2: If it looks good, do the copy
-  ./compair-single-file /source /destination
+  ./compair-standalone-macos /source /destination
 
-Step 3: Only use --sync if you backuped destination
-  ./compair-single-file /source /destination --sync
+Step 3: Only use --sync if you backed up destination
+  ./compair-standalone-macos /source /destination --sync
 
 ================================================================================
 📚 REAL WORLD EXAMPLES
 ================================================================================
 
 Example 1: Daily Document Backup
-  ./compair-single-file ~/Documents ~/Documents-Backup
+  ./compair-standalone-macos ~/Documents ~/Documents-Backup
 
 Example 2: Mirror External Drive
-  ./compair-single-file /Volumes/ExternalDrive ~/cloud-backup --sync
+  ./compair-standalone-macos /Volumes/ExternalDrive ~/cloud-backup --sync
 
 Example 3: Sync Downloads
-  ./compair-single-file ~/Downloads ~/Downloads-Archive
+  ./compair-standalone-macos ~/Downloads ~/Downloads-Archive
 
 Example 4: Scheduled Backup (macOS/Linux cron)
-  0 2 * * * ~/compair-single-file ~/documents ~/backup --sync
+  0 2 * * * ~/compair-standalone-macos ~/documents ~/backup --sync
   # Runs daily at 2 AM
 
 Example 5: Multiple Backups
-  ./compair-single-file ~/data ~/backup1 --sync
-  ./compair-single-file ~/data ~/backup2 --sync
-  ./compair-single-file ~/data ~/backup3 --sync
+  ./compair-standalone-macos ~/data ~/backup1 --sync
+  ./compair-standalone-macos ~/data ~/backup2 --sync
+  ./compair-standalone-macos ~/data ~/backup3 --sync
 
 Example 6: Project Sync
-  ./compair-single-file ~/projects/active ~/projects/archive
+  ./compair-standalone-macos ~/projects/active ~/projects/archive
 
 Example 7: Cloud Sync
-  ./compair-single-file ~/local-folder ~/cloud-mounted-folder --sync
+  ./compair-standalone-macos ~/local-folder ~/cloud-mounted-folder --sync
 
 ================================================================================
 🆘 TROUBLESHOOTING
@@ -178,18 +242,13 @@ Example 7: Cloud Sync
 Problem: "command not found"
 Solution:
   • Make sure you're in the right directory
-  • Try: ./compair-single-file (with ./)
-  • Or: /full/path/to/compair-single-file
+  • Try: ./compair-standalone-macos (with ./)
+  • Or: /full/path/to/compair-standalone-macos
 
-Problem: "Permission denied"
+Problem: "Permission denied" (macOS/Linux)
 Solution:
-  chmod +x compair-single-file
-  ./compair-single-file /source /destination
-
-Problem: "node: command not found"
-Solution:
-  • Install Node.js from https://nodejs.org/
-  • Verify: node --version (should be v20+)
+  chmod +x compair-standalone-macos
+  ./compair-standalone-macos /source /destination
 
 Problem: "No such file or directory"
 Solution:
@@ -202,118 +261,130 @@ Solution:
   • Check write permissions on destination
   • The tool will skip inaccessible files
 
+Problem: Large directories (100k+ files) cause issues
+Solution:
+  • The tool now detects this automatically!
+  • It calculates required stack size
+  • Then restarts itself with optimized memory
+  • You don't need to do anything - it's automatic!
+
 ================================================================================
 💡 PRO TIPS
 ================================================================================
 
 Tip 1: Create an Alias
-  echo "alias compair='~/compair-single-file'" >> ~/.zshrc
+  echo "alias compair='~/compair-standalone-macos'" >> ~/.zshrc
   source ~/.zshrc
   compair /source /destination
 
 Tip 2: Create a Backup Script
   #!/bin/bash
-  ~/compair-single-file ~/documents ~/backup-$(date +%Y%m%d) --sync
+  ~/compair-standalone-macos ~/documents ~/backup-$(date +%Y%m%d) --sync
 
 Tip 3: Add to System PATH
-  sudo cp compair-single-file /usr/local/bin/compair
+  sudo cp compair-standalone-macos /usr/local/bin/compair
   compair /source /destination
 
 Tip 4: Compress for Storage
-  tar -czf compair-single-file.tar.gz compair-single-file
+  tar -czf compair.tar.gz compair-standalone-macos
   # Saves as .tar.gz file
 
 Tip 5: Use in Scripts
   #!/bin/bash
-  if ~/compair-single-file /src /dst --no-copy; then
-    ~/compair-single-file /src /dst
+  if ~/compair-standalone-macos /src /dst --no-copy; then
+    ~/compair-standalone-macos /src /dst
     echo "Sync complete!"
   fi
 
 ================================================================================
-✅ VERIFICATION STEPS
+✅ VERIFICATION STEPS FOR BUILD
 ================================================================================
 
-Before using, verify everything:
+After building, verify everything:
 
-Step 1: Check Node.js
-  node --version     # Should show v20+
+Step 1: Check Files Exist
+  ls -lh dist/compair-*
+  # Should show all 3 executables
 
-Step 2: Make Executable (macOS/Linux)
-  chmod +x compair-single-file
+Step 2: Make Executable
+  chmod +x dist/compair-macos-arm64
+  chmod +x dist/compair-linux-x64
 
-Step 3: Test It Works
-  ./compair-single-file
+Step 3: Test macOS Version
+  ./dist/compair-macos-arm64
   # Should show usage help
 
 Step 4: Test with Paths
-  ./compair-single-file /Users/you/test1 /Users/you/test2 --no-copy
+  ./dist/compair-macos-arm64 /Users/you/test1 /Users/you/test2 --no-copy
   # Should show what would be copied
 
-Step 5: You're Ready!
-  Now use it for real
+Step 5: Check File Integrity
+  file dist/compair-*
+  # Should show as executables
+
+Step 6: You're Ready to Distribute!
+  Copy executables to COMPAIR/ folder
 
 ================================================================================
-🎯 ONE-LINERS
+🎯 CROSS-PLATFORM BUILD NOTES
 ================================================================================
 
-Just copy and paste:
+Building from macOS:
+  • Can build for macOS (ARM64) natively
+  • Can cross-compile for Linux and Windows
+  • Fastest option
 
-Basic:
-  ./compair-single-file ~/src ~/dst
+Building from Linux:
+  • Can build for Linux natively
+  • Can cross-compile for macOS and Windows
+  • Good for CI/CD pipelines
 
-Preview:
-  ./compair-single-file ~/src ~/dst --no-copy
+Building from Windows:
+  • Can build for Windows natively
+  • Can cross-compile for macOS and Linux
+  • Requires Visual Studio Build Tools
 
-Sync:
-  ./compair-single-file ~/src ~/dst --sync
-
-Help:
-  ./compair-single-file
-
-After adding to PATH:
-  compair ~/src ~/dst
-
-Count files:
-  ./compair-single-file ~/src ~/dst --no-copy | grep -i "unique"
+Best practice:
+  • Build on macOS if possible (fastest)
+  • Or use CI/CD pipeline (GitHub Actions, etc.)
+  • Ensures all platforms built correctly
 
 ================================================================================
-📞 NEED MORE INFO?
+📦 WHAT'S INCLUDED IN STANDALONE EXECUTABLE
 ================================================================================
 
-Check these files for detailed information:
+Inside each 36-44 MB executable:
+  ✓ Full Node.js 18 runtime
+  ✓ Application code (bundled)
+  ✓ All dependencies (fs, path, child_process, v8)
+  ✓ Auto-stack optimization logic
+  ✓ Large directory detection & handling
 
-• README.md                  - General features
-• INDEX.md                   - Navigation guide
-• SETUP_GUIDE.md             - Complete setup
-• DISTRIBUTION_OPTIONS.md    - Compare all methods
-• STANDALONE_README.md       - Wrapper version guide
+Nothing else needed!
 
 ================================================================================
 🎉 SUMMARY
 ================================================================================
 
-You have:
-✅ One single file executable (compair-single-file)
-✅ Alternative .js version (compair-standalone-single.js)
-✅ Windows batch wrapper (compair-single.bat)
-✅ All code included
-✅ No external dependencies except Node.js
-✅ Ready to use immediately
-✅ Can be copied anywhere
-✅ Works on macOS, Linux, Windows
+You now have:
+✓ Clean root directory with source files only
+✓ Updated SINGLE_FILE_GUIDE.txt with build instructions
+✓ Three standalone executables in COMPAIR/ folder
+✓ Ready for multi-OS distribution
+✓ Auto-optimized for large directories (100k+ files)
+✓ Complete independence from system dependencies
 
-Just copy compair-single-file and start comparing folders!
+To rebuild anytime:
+  npm install && npm run build && npm run bundle && pkg dist/bundled/index.js --targets node18-macos-arm64,node18-linux-x64,node18-win-x64 --output dist/compair && chmod +x dist/compair-* && cp dist/compair-* COMPAIR/
 
-Usage:
-  ./compair-single-file /source /destination
-
-That's it! 🚀
+That's it! Ready to distribute to any platform! 🚀
 
 ================================================================================
-Version: 1.0.0
+Version: 1.1.0
 License: MIT
-Node.js: 20.0.0+ required
-Platforms: macOS, Linux, Windows
-File Size: 7.8 KB
+Platforms: macOS (ARM64), Linux (x64), Windows (x64)
+Node.js bundled: Yes (no installation needed)
+File Size: 36-44 MB per platform
+Build Tool: pkg
+Latest Update: Feb 23, 2026
 ================================================================================
