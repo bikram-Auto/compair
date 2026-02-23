@@ -208,12 +208,12 @@ function printResults(result) {
 async function main() {
   const args = process.argv.slice(2);
   if (args.length < 2) {
-    console.log("Usage: npx ts-node index.ts <folderA> <folderB> [options]");
+    console.log("Usage: ./compair-single-file <folderA> <folderB> [options]");
     console.log("\nOptions:");
     console.log("  --no-copy    Only compare, don't copy files");
-    console.log("  --sync       Delete all from B and copy all from A (full sync)");
-    console.log("\nExample: npx ts-node index.ts ./source ./destination");
-    console.log("Example: npx ts-node index.ts ./source ./destination --sync\n");
+    console.log("  --sync       Delete all from Destination and copy all from Source (full sync)");
+    console.log("\nExample: ./compair-single-file /source /destination");
+    console.log("Example: ./compair-single-file /source /destination --sync\n");
     process.exit(1);
   }
   const folderA = args[0];
