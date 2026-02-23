@@ -1,16 +1,10 @@
 ================================================================================
-🎯 SINGLE FILE EXECUTABLE - FOLDER COMPAIR
-================================================================================
-
-You now have SINGLE FILE EXECUTABLES that include everything!
-
-================================================================================
-📦 YOUR FILES
+SINGLE FILE EXECUTABLE - FOLDER COMPAIR
 ================================================================================
 
 EXECUTABLE FILES (Choose one):
 
-✨ compair-single-file (7.8 KB) - RECOMMENDED
+   compair-single-file (7.8 KB) - RECOMMENDED
    • macOS / Linux executable
    • No extension needed
    • Just copy and run!
@@ -27,7 +21,7 @@ EXECUTABLE FILES (Choose one):
    • Usage: compair-single.bat C:\source C:\destination
 
 ================================================================================
-⚡ 30-SECOND QUICK START
+30-SECOND QUICK START
 ================================================================================
 
 macOS / Linux:
@@ -38,7 +32,7 @@ Windows:
   compair-single.bat C:\path\to\source C:\path\to\destination
 
 ================================================================================
-🎯 USAGE EXAMPLES
+USAGE EXAMPLES
 ================================================================================
 
 Compare and Copy Unique Files:
@@ -54,7 +48,7 @@ Show Help:
   ./compair-single-file
 
 ================================================================================
-💾 DEPLOYMENT - HOW TO USE ON OTHER MACHINES
+DEPLOYMENT - HOW TO USE ON OTHER MACHINES
 ================================================================================
 
 Option 1: Local Machine
@@ -85,7 +79,7 @@ Option 5: Windows System Deployment
   # Use from anywhere: compair-single.bat
 
 ================================================================================
-📊 WHAT YOU'RE GETTING
+WHAT YOU'RE GETTING
 ================================================================================
 
 File Size:          7.8 KB (tiny!)
@@ -97,20 +91,20 @@ Platforms:          macOS, Linux, Windows
 Setup:              Just copy the file!
 
 ================================================================================
-✨ KEY FEATURES
+KEY FEATURES
 ================================================================================
 
-✅ SINGLE FILE              - Just one file, nothing else
-✅ TINY (7.8 KB)            - Super small
-✅ COMPLETE                 - All code included
-✅ PORTABLE                 - Works anywhere with Node.js
-✅ NO UNPACKING             - Run immediately
-✅ NO NPM INSTALL NEEDED    - Already bundled
-✅ NO BUILD NEEDED          - Just execute
-✅ CROSS-PLATFORM           - macOS, Linux, Windows
+SINGLE FILE              - Just one file, nothing else
+TINY (7.8 KB)            - Super small
+COMPLETE                 - All code included
+PORTABLE                 - Works anywhere with Node.js
+NO UNPACKING             - Run immediately
+NO NPM INSTALL NEEDED    - Already bundled
+NO BUILD NEEDED          - Just execute
+CROSS-PLATFORM           - macOS, Linux, Windows
 
 ================================================================================
-🔒 SAFETY GUIDE - IMPORTANT!
+SAFETY GUIDE - IMPORTANT!
 ================================================================================
 
 THREE MODES:
@@ -119,19 +113,19 @@ THREE MODES:
    ./compair-single-file /source /destination
    → Copies unique files only
    → Your destination files are never deleted
-   → SAFE TO USE ✅
+   → SAFE TO USE
 
 2. PREVIEW MODE (Safest)
    ./compair-single-file /source /destination --no-copy
    → Shows what WOULD be done
    → Nothing is actually copied
-   → SAFEST TO USE ✅
+   → SAFEST TO USE
 
 3. SYNC MODE (Dangerous!)
    ./compair-single-file /source /destination --sync
    → DELETE ALL files in destination
    → Then copy everything from source
-   → ONLY USE IF YOU'RE SURE ⚠️
+   → ONLY USE IF YOU'RE SURE
 
 BEST PRACTICE:
 Step 1: Always preview first
@@ -144,7 +138,7 @@ Step 3: Only use --sync if you backuped destination
   ./compair-single-file /source /destination --sync
 
 ================================================================================
-📚 REAL WORLD EXAMPLES
+REAL WORLD EXAMPLES
 ================================================================================
 
 Example 1: Daily Document Backup
@@ -172,7 +166,7 @@ Example 7: Cloud Sync
   ./compair-single-file ~/local-folder ~/cloud-mounted-folder --sync
 
 ================================================================================
-🆘 TROUBLESHOOTING
+TROUBLESHOOTING
 ================================================================================
 
 Problem: "command not found"
@@ -203,7 +197,7 @@ Solution:
   • The tool will skip inaccessible files
 
 ================================================================================
-💡 PRO TIPS
+PRO TIPS
 ================================================================================
 
 Tip 1: Create an Alias
@@ -231,7 +225,7 @@ Tip 5: Use in Scripts
   fi
 
 ================================================================================
-✅ VERIFICATION STEPS
+VERIFICATION STEPS
 ================================================================================
 
 Before using, verify everything:
@@ -254,7 +248,7 @@ Step 5: You're Ready!
   Now use it for real
 
 ================================================================================
-🎯 ONE-LINERS
+ONE-LINERS
 ================================================================================
 
 Just copy and paste:
@@ -276,39 +270,6 @@ After adding to PATH:
 
 Count files:
   ./compair-single-file ~/src ~/dst --no-copy | grep -i "unique"
-
-================================================================================
-📞 NEED MORE INFO?
-================================================================================
-
-Check these files for detailed information:
-
-• README.md                  - General features
-• INDEX.md                   - Navigation guide
-• SETUP_GUIDE.md             - Complete setup
-• DISTRIBUTION_OPTIONS.md    - Compare all methods
-• STANDALONE_README.md       - Wrapper version guide
-
-================================================================================
-🎉 SUMMARY
-================================================================================
-
-You have:
-✅ One single file executable (compair-single-file)
-✅ Alternative .js version (compair-standalone-single.js)
-✅ Windows batch wrapper (compair-single.bat)
-✅ All code included
-✅ No external dependencies except Node.js
-✅ Ready to use immediately
-✅ Can be copied anywhere
-✅ Works on macOS, Linux, Windows
-
-Just copy compair-single-file and start comparing folders!
-
-Usage:
-  ./compair-single-file /source /destination
-
-That's it! 🚀
 
 ================================================================================
 Version: 1.0.0
