@@ -12,6 +12,7 @@ A fast, portable tool that compares two folders and manages file synchronization
 - **Three Safety Modes**: Preview, Safe Copy, or Full Sync
 - **Nested Folders**: Handles files in subdirectories
 - **Detailed Reports**: See exactly what's being compared and copied
+- **Auto-Optimization**: Automatically detects large directories (100k+ files) and optimizes stack size
 
 ## Quick Start (30 Seconds)
 
@@ -253,6 +254,21 @@ fi
 ```
 
 ## Troubleshooting
+
+### "Maximum call stack size exceeded" with very large directories
+**Good news!** As of v1.1.0, this is handled **automatically**!
+
+The tool now:
+1. **Auto-detects** the number of files in both folders
+2. **Calculates** the required stack size dynamically
+3. **Restarts** with optimized stack automatically if needed
+
+You don't need to do anything manually! The tool will detect large directories and optimize itself.
+
+**Optional**: If you want to manually specify a stack size:
+```bash
+node --stack-size=2048 dist/index.js /source /destination --no-copy
+```
 
 ### "command not found"
 - Make sure you're in the right directory

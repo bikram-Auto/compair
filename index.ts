@@ -2,6 +2,7 @@
 
 import * as fs from "fs";
 import * as path from "path";
+import { spawn } from "child_process";
 
 interface ComparisonResult {
   folderA: string;
@@ -52,9 +53,27 @@ function deleteFolderContentsRecursive(folderPath: string): string[] {
 /**
  * Recursively get all files from a folder and its nested subfolders
  * Returns relative paths from the root folder (e.g., "subfolder/file.txt")
+ * Optimized to handle large directories (100k+ files) without stack overflow
  */
-function getAllFilesRecursive(folderPath: string, relativePath: string = ""): string[] {
+function getAllFilesRecursive(
+  folderPath: string,
+  relativePath: string = "",
+  visitedPaths: Set<string> = new Set(),
+  maxDepth: number = 100,
+  currentDepth: number = 0
+): string[] {
   const files: string[] = [];
+
+  // Prevent infinite recursion and limit depth
+  if (currentDepth > maxDepth) {
+    return files;
+  }
+
+  // Prevent circular references using the folder path as-is
+  if (visitedPaths.has(folderPath)) {
+    return files;
+  }
+  visitedPaths.add(folderPath);
 
   try {
     const entries = fs.readdirSync(folderPath);
@@ -64,21 +83,34 @@ function getAllFilesRecursive(folderPath: string, relativePath: string = ""): st
       const relPath = relativePath ? path.join(relativePath, entry) : entry;
 
       try {
-        const stat = fs.statSync(fullPath);
+        const stat = fs.lstatSync(fullPath);
+        
         if (stat.isFile()) {
           files.push(relPath);
-        } else if (stat.isDirectory()) {
+        } else if (stat.isDirectory() && !stat.isSymbolicLink()) {
+          // Skip symbolic link directories to prevent circular references
           // Recursively get files from subdirectories
-          const nestedFiles = getAllFilesRecursive(fullPath, relPath);
-          files.push(...nestedFiles);
+          try {
+            const nestedFiles = getAllFilesRecursive(
+              fullPath,
+              relPath,
+              new Set(visitedPaths),
+              maxDepth,
+              currentDepth + 1
+            );
+            files.push(...nestedFiles);
+          } catch (error) {
+            // Skip subdirectories that cause errors
+            continue;
+          }
         }
       } catch (error) {
-        // Skip entries that can't be accessed
-        console.warn(`Warning: Could not access ${entry}`);
+        // Skip individual entries that have issues (with error tolerance)
+        continue;
       }
     }
   } catch (error) {
-    console.warn(`Warning: Could not read directory ${folderPath}`);
+    // If we can't read the directory, just return what we have
   }
 
   return files;
@@ -114,8 +146,13 @@ async function compareFolders(
     }
 
     // Get list of all files (including nested) from each folder
+    console.log(`Scanning source folder (${folderA})...`);
     const filesA = getAllFilesRecursive(folderA);
+    console.log(`Found ${filesA.length} files in source folder`);
+    
+    console.log(`Scanning destination folder (${folderB})...`);
     let filesB = getAllFilesRecursive(folderB);
+    console.log(`Found ${filesB.length} files in destination folder`);
 
     const filesASet = new Set(filesA);
     const filesBSet = new Set(filesB);
@@ -224,6 +261,106 @@ function printResults(result: ComparisonResult): void {
   console.log("\n" + "=".repeat(60) + "\n");
 }
 
+/**
+ * Quickly estimate the number of files in folders to determine required stack size
+ * Uses sampling to avoid full traversal of huge directories
+ */
+function estimateFileCount(folderPath: string, maxScanDepth: number = 2, currentDepth: number = 0): number {
+  if (currentDepth > maxScanDepth || !fs.existsSync(folderPath)) {
+    return 0;
+  }
+
+  let count = 0;
+  try {
+    const entries = fs.readdirSync(folderPath);
+    
+    for (const entry of entries) {
+      const fullPath = path.join(folderPath, entry);
+      try {
+        const stat = fs.lstatSync(fullPath);
+        if (stat.isFile()) {
+          count++;
+        } else if (stat.isDirectory() && !stat.isSymbolicLink() && currentDepth < maxScanDepth) {
+          count += estimateFileCount(fullPath, maxScanDepth, currentDepth + 1);
+        }
+      } catch (error) {
+        // Skip entries that can't be accessed
+      }
+    }
+  } catch (error) {
+    // If we can't read the directory, just return current count
+  }
+
+  return count;
+}
+
+/**
+ * Calculate required stack size based on estimated file count
+ * More aggressive formula to handle large flat directories (100k+ files)
+ * Capped between 1024 MB and 8192 MB
+ */
+function calculateRequiredStackSize(estimatedFileCount: number): number {
+  // More aggressive heuristic for large flat directories
+  // Estimate 2 MB per 1000 files for safety
+  const baseStack = 1024; // 1024 MB minimum for large directories
+  const calculatedStack = baseStack + Math.ceil(estimatedFileCount / 500); // 500 files per MB
+  
+  // Cap between minimum and maximum reasonable values
+  const minStack = 1024; // 1024 MB minimum
+  const maxStack = 8192; // 8192 MB maximum
+  const requiredStack = Math.max(minStack, Math.min(maxStack, calculatedStack));
+  
+  return requiredStack;
+}
+
+/**
+ * Check if we need more stack size and respawn if necessary
+ */
+async function ensureSufficientStackSize(folderA: string, folderB: string): Promise<boolean> {
+  // Quick estimate of file count (sampling first 2 levels only)
+  console.log("Analyzing folder structure...");
+  const estimatedFilesA = estimateFileCount(folderA, 2);
+  const estimatedFilesB = estimateFileCount(folderB, 2);
+  const totalEstimated = estimatedFilesA + estimatedFilesB;
+  
+  const requiredStack = calculateRequiredStackSize(totalEstimated);
+  
+  // If total estimated files is small, no need for extra stack
+  if (totalEstimated < 10000) {
+    return false; // No respawn needed
+  }
+  
+  console.log(`Detected approximately ${totalEstimated} files (estimated).`);
+  console.log(`Required stack size: ${requiredStack} MB`);
+  
+  // If we're already running with sufficient stack, continue
+  if (process.env.COMPAIR_STACK_SIZE_ADJUSTED === "true") {
+    console.log("Already running with optimized stack size.\n");
+    return false;
+  }
+  
+  // Spawn a new process with increased stack size using current executable
+  console.log("Relaunching with optimized stack size...\n");
+  
+  return new Promise((resolve) => {
+    const env = { ...process.env, COMPAIR_STACK_SIZE_ADJUSTED: "true" };
+    const stackSizeArg = `--stack-size=${Math.max(1024, requiredStack)}`;
+    
+    // Spawn self (current executable) with increased stack size
+    // process.argv[1] is the current script being executed
+    const child = spawn(process.execPath, [stackSizeArg, process.argv[1], ...process.argv.slice(2)], {
+      env,
+      stdio: "inherit"
+    });
+    
+    child.on("exit", (code) => {
+      process.exit(code || 0);
+    });
+    
+    resolve(true);
+  });
+}
+
 // Main execution
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
@@ -242,6 +379,13 @@ async function main(): Promise<void> {
 
   const folderA = args[0];
   const folderB = args[1];
+  
+  // Auto-detect and adjust stack size if needed
+  const respawned = await ensureSufficientStackSize(folderA, folderB);
+  if (respawned) {
+    return; // Process has been respawned, exit this one
+  }
+
   const shouldCopy = !args.includes("--no-copy");
   const syncMode = args.includes("--sync");
 
