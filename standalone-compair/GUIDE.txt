@@ -1,0 +1,347 @@
+================================================================================
+STANDALONE EXECUTABLE - FOLDER COMPAIR
+================================================================================
+
+COMPLETELY STANDALONE - NO DEPENDENCIES REQUIRED!
+
+STANDALONE (NO installation required):
+  File Size: 36-44 MB (includes Node.js bundled)
+  Requirements: None! Everything included
+  Files:
+    - compair-standalone-macos (macOS ARM64)
+    - compair-standalone-linux (Linux x64)
+    - compair-standalone-windows.exe (Windows x64)
+  
+  Best for: Everyone - end users, developers, any system
+  No Node.js installation needed
+  Just download and run!
+  
+  Usage: ./compair-standalone-macos /source /destination
+         ./compair-standalone-windows.exe C:\source C:\destination
+
+================================================================================
+WHY STANDALONE?
+================================================================================
+
+✓ No Node.js installation needed
+✓ Works on any fresh machine
+✓ Complete independence from system dependencies
+✓ Single self-contained executable
+✓ Just download and run immediately
+✓ Perfect for distribution, USB drives, backups
+
+================================================================================
+30-SECOND QUICK START
+================================================================================
+
+macOS (ARM64 / Apple Silicon / M1+):
+  chmod +x compair-standalone-macos
+  ./compair-standalone-macos /path/to/source /path/to/destination
+
+Linux (x64):
+  chmod +x compair-standalone-linux
+  ./compair-standalone-linux /path/to/source /path/to/destination
+
+Windows (x64):
+  compair-standalone-windows.exe C:\path\to\source C:\path\to\destination
+
+================================================================================
+AVAILABLE EXECUTABLE FILES
+================================================================================
+
+STANDALONE VERSIONS - Choose one for your platform:
+
+   compair-standalone-macos (44 MB)
+   • macOS ARM64 (Apple Silicon / M1+)
+   • Completely standalone, no dependencies
+   • Just download and run!
+   • Usage: ./compair-standalone-macos /source /destination
+
+   compair-standalone-linux (44 MB)
+   • Linux x64 (64-bit Intel/AMD)
+   • Completely standalone, no dependencies
+   • Just download and run!
+   • Usage: ./compair-standalone-linux /source /destination
+
+   compair-standalone-windows.exe (36 MB)
+   • Windows 64-bit
+   • Completely standalone, no dependencies
+   • Just download and run!
+   • Usage: compair-standalone-windows.exe C:\source C:\destination
+
+================================================================================
+USAGE EXAMPLES
+================================================================================
+
+Compare and Copy Unique Files:
+  ./compair-standalone-macos /source /destination
+
+Preview Only (Don't Copy):
+  ./compair-standalone-macos /source /destination --no-copy
+
+Full Sync (DELETE destination, then copy source):
+  ./compair-standalone-macos /source /destination --sync
+
+Show Help:
+  ./compair-standalone-macos
+
+================================================================================
+DEPLOYMENT - HOW TO USE ON OTHER MACHINES
+================================================================================
+
+Option 1: Local Machine (macOS/Linux)
+  chmod +x compair-standalone-macos
+  ./compair-standalone-macos ~/Documents ~/Backup
+
+Option 2: Transfer to Another Machine (macOS/Linux)
+  scp compair-standalone-macos user@other-machine:~/
+  # On their machine:
+  chmod +x ~/compair-standalone-macos
+  ~/compair-standalone-macos ~/source ~/destination
+
+Option 3: Email/Compress for Transfer (macOS/Linux)
+  tar -czf compair.tar.gz compair-standalone-macos
+  # Email/transfer the file
+  # On receiving machine:
+  tar -xzf compair.tar.gz
+  chmod +x compair-standalone-macos
+  ./compair-standalone-macos /source /destination
+
+Option 4: Global Access (macOS/Linux)
+  sudo cp compair-standalone-macos /usr/local/bin/compair
+  compair /any/source /any/destination
+
+Option 5: Windows System Deployment
+  # Copy compair-standalone-windows.exe to C:\tools\
+  # Add C:\tools\ to system PATH
+  # Use from anywhere: compair-standalone-windows.exe
+
+================================================================================
+WHAT YOU'RE GETTING
+================================================================================
+
+File Size:          36-44 MB (includes Node.js)
+Type:               Single self-contained executable
+All Code:           Yes (fully bundled)
+All Dependencies:   Yes (all included!)
+External Deps:      None - completely standalone!
+Platforms:          macOS, Linux, Windows
+Setup:              Just download and run!
+Large Dir Support:  Auto-optimizes for 100k+ files
+
+================================================================================
+KEY FEATURES
+================================================================================
+
+STANDALONE              - No dependencies, no Node.js needed!
+SINGLE FILE             - Just one file, nothing else
+COMPLETE                - Everything bundled inside
+PORTABLE                - Works anywhere, any system
+NO SETUP                - Download and run immediately
+NO NPM INSTALL NEEDED   - Not needed at all
+NO BUILD NEEDED         - Just execute
+CROSS-PLATFORM          - macOS, Linux, Windows
+AUTO-OPTIMIZED          - Detects large dirs & adjusts stack automatically
+
+================================================================================
+SAFETY GUIDE - IMPORTANT!
+================================================================================
+
+THREE MODES:
+
+1. SAFE MODE (Default)
+   ./compair-standalone-macos /source /destination
+   → Copies unique files only
+   → Your destination files are never deleted
+   → SAFE TO USE
+
+2. PREVIEW MODE (Safest)
+   ./compair-standalone-macos /source /destination --no-copy
+   → Shows what WOULD be done
+   → Nothing is actually copied
+   → SAFEST TO USE
+
+3. SYNC MODE (Dangerous!)
+   ./compair-standalone-macos /source /destination --sync
+   → DELETE ALL files in destination
+   → Then copy everything from source
+   → ONLY USE IF YOU'RE SURE
+
+BEST PRACTICE:
+Step 1: Always preview first
+  ./compair-standalone-macos /source /destination --no-copy
+
+Step 2: If it looks good, do the copy
+  ./compair-standalone-macos /source /destination
+
+Step 3: Only use --sync if you backed up destination
+  ./compair-standalone-macos /source /destination --sync
+
+================================================================================
+REAL WORLD EXAMPLES
+================================================================================
+
+Example 1: Daily Document Backup
+  ./compair-standalone-macos ~/Documents ~/Documents-Backup
+
+Example 2: Mirror External Drive
+  ./compair-standalone-macos /Volumes/ExternalDrive ~/cloud-backup --sync
+
+Example 3: Sync Downloads
+  ./compair-standalone-macos ~/Downloads ~/Downloads-Archive
+
+Example 4: Scheduled Backup (macOS/Linux cron)
+  0 2 * * * ~/compair-standalone-macos ~/documents ~/backup --sync
+  # Runs daily at 2 AM
+
+Example 5: Multiple Backups
+  ./compair-standalone-macos ~/data ~/backup1 --sync
+  ./compair-standalone-macos ~/data ~/backup2 --sync
+  ./compair-standalone-macos ~/data ~/backup3 --sync
+
+Example 6: Project Sync
+  ./compair-standalone-macos ~/projects/active ~/projects/archive
+
+Example 7: Cloud Sync
+  ./compair-standalone-macos ~/local-folder ~/cloud-mounted-folder --sync
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Problem: "command not found"
+Solution:
+  • Make sure you're in the right directory
+  • Try: ./compair-standalone-macos (with ./)
+  • Or: /full/path/to/compair-standalone-macos
+
+Problem: "Permission denied" (macOS/Linux)
+Solution:
+  chmod +x compair-standalone-macos
+  ./compair-standalone-macos /source /destination
+
+Problem: "No such file or directory"
+Solution:
+  • Check paths exist: ls /path/to/source
+  • Use correct paths
+
+Problem: "Warning: Could not access [folder]"
+Solution:
+  • Check read permissions on source
+  • Check write permissions on destination
+  • The tool will skip inaccessible files
+
+Problem: Large directories (100k+ files) cause issues
+Solution:
+  • The tool now detects this automatically!
+  • It calculates required stack size
+  • Then restarts itself with optimized memory
+  • You don't need to do anything - it's automatic!
+
+================================================================================
+PRO TIPS
+================================================================================
+
+Tip 1: Create an Alias
+  echo "alias compair='~/compair-standalone-macos'" >> ~/.zshrc
+  source ~/.zshrc
+  compair /source /destination
+
+Tip 2: Create a Backup Script
+  #!/bin/bash
+  ~/compair-standalone-macos ~/documents ~/backup-$(date +%Y%m%d) --sync
+
+Tip 3: Add to System PATH
+  sudo cp compair-standalone-macos /usr/local/bin/compair
+  compair /source /destination
+
+Tip 4: Compress for Storage
+  tar -czf compair.tar.gz compair-standalone-macos
+  # Saves as .tar.gz file
+
+Tip 5: Use in Scripts
+  #!/bin/bash
+  if ~/compair-standalone-macos /src /dst --no-copy; then
+    ~/compair-standalone-macos /src /dst
+    echo "Sync complete!"
+  fi
+
+================================================================================
+VERIFICATION STEPS
+================================================================================
+
+Before using, verify everything:
+
+Step 1: Make Executable (macOS/Linux)
+  chmod +x compair-standalone-macos
+
+Step 2: Test It Works
+  ./compair-standalone-macos
+  # Should show usage help
+
+Step 3: Test with Paths
+  ./compair-standalone-macos /Users/you/test1 /Users/you/test2 --no-copy
+  # Should show what would be copied
+
+Step 4: You're Ready!
+  Now use it for real
+
+================================================================================
+ONE-LINERS
+================================================================================
+
+Just copy and paste:
+
+Basic:
+  ./compair-standalone-macos ~/src ~/dst
+
+Preview:
+  ./compair-standalone-macos ~/src ~/dst --no-copy
+
+Sync:
+  ./compair-standalone-macos ~/src ~/dst --sync
+
+Help:
+  ./compair-standalone-macos
+
+After adding to PATH:
+  compair ~/src ~/dst
+
+Count files:
+  ./compair-standalone-macos ~/src ~/dst --no-copy | grep -i "unique"
+
+================================================================================
+NEW IN v1.1.0 - AUTO-STACK OPTIMIZATION & TRUE STANDALONE
+================================================================================
+
+Auto-Stack Optimization:
+The tool now automatically detects when folders contain many files (100k+)
+and optimizes itself without user intervention!
+
+1. Analyzes both folders quickly (sampling)
+2. Estimates total file count
+3. Calculates required stack size
+4. Restarts with optimized memory if needed
+5. Processes all files successfully!
+
+True Standalone Executables:
+Include Node.js bundled inside - completely standalone:
+- No installation of Node.js required
+- Single executable file - just download and run
+- Works on fresh machines with zero dependencies
+- Available for macOS, Linux, and Windows
+
+Tested with:
+  ✓ 137,000+ files in a single directory
+  ✓ Directories with 100,000+ files
+  ✓ Nested folder structures of any depth
+  ✓ Complex symlink scenarios
+
+================================================================================
+Version: 1.1.0
+License: MIT
+Platforms: macOS (ARM64), Linux (x64), Windows (x64)
+
+File Size: 36-44 MB per platform
+Requirements: NONE - Completely standalone!
+================================================================================
