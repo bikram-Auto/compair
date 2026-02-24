@@ -82,6 +82,14 @@ Preview Only (Don't Copy):
 Full Sync (DELETE destination, then copy source):
   ./compair-standalone-macos /source /destination --sync
 
+Copy Only Specific File or Folder (NEW in v1.2.0):
+  ./compair-standalone-macos /source /destination --only "folder"
+  ./compair-standalone-macos /source /destination --only "folder/file.txt"
+
+Combine Flags:
+  ./compair-standalone-macos /source /destination --only "folder" --no-copy
+  ./compair-standalone-macos /source /destination --only "folder" --sync
+
 Show Help:
   ./compair-standalone-macos
 
@@ -147,7 +155,7 @@ AUTO-OPTIMIZED          - Detects large dirs & adjusts stack automatically
 SAFETY GUIDE - IMPORTANT!
 ================================================================================
 
-THREE MODES:
+FOUR MODES:
 
 1. SAFE MODE (Default)
    ./compair-standalone-macos /source /destination
@@ -167,6 +175,12 @@ THREE MODES:
    → Then copy everything from source
    → ONLY USE IF YOU'RE SURE
 
+4. FILTER MODE (NEW in v1.2.0)
+   ./compair-standalone-macos /source /destination --only "folder"
+   → Copy/compare only specific file or folder
+   → Combine with other modes
+   → SAFE TO USE
+
 BEST PRACTICE:
 Step 1: Always preview first
   ./compair-standalone-macos /source /destination --no-copy
@@ -176,6 +190,10 @@ Step 2: If it looks good, do the copy
 
 Step 3: Only use --sync if you backed up destination
   ./compair-standalone-macos /source /destination --sync
+
+Step 4: Use --only for selective operations
+  ./compair-standalone-macos /source /destination --only "folder"
+  ./compair-standalone-macos /source /destination --only "folder" --no-copy
 
 ================================================================================
 REAL WORLD EXAMPLES
@@ -204,6 +222,18 @@ Example 6: Project Sync
 
 Example 7: Cloud Sync
   ./compair-standalone-macos ~/local-folder ~/cloud-mounted-folder --sync
+
+Example 8: Copy Only Reports Folder (NEW in v1.2.0)
+  ./compair-standalone-macos ~/source ~/destination --only "reports"
+
+Example 9: Copy Single File
+  ./compair-standalone-macos ~/source ~/destination --only "config.json"
+
+Example 10: Preview Specific Folder Before Copying
+  ./compair-standalone-macos ~/source ~/destination --only "documents" --no-copy
+
+Example 11: Sync Specific Subfolder Only
+  ./compair-standalone-macos ~/source ~/destination --only "2026-reports" --sync
 
 ================================================================================
 TROUBLESHOOTING
@@ -301,6 +331,15 @@ Preview:
 Sync:
   ./compair-standalone-macos ~/src ~/dst --sync
 
+Filter and Copy:
+  ./compair-standalone-macos ~/src ~/dst --only "folder"
+
+Filter and Preview:
+  ./compair-standalone-macos ~/src ~/dst --only "folder" --no-copy
+
+Filter and Sync:
+  ./compair-standalone-macos ~/src ~/dst --only "folder" --sync
+
 Help:
   ./compair-standalone-macos
 
@@ -309,6 +348,41 @@ After adding to PATH:
 
 Count files:
   ./compair-standalone-macos ~/src ~/dst --no-copy | grep -i "unique"
+
+================================================================================
+NEW IN v1.2.0 - SELECTIVE FILE/FOLDER FILTERING
+================================================================================
+
+--only Flag (Filter Mode):
+The tool now supports selective copying of specific files or folders!
+
+Usage:
+  ./compair-standalone-macos /source /destination --only "folder"
+  ./compair-standalone-macos /source /destination --only "path/to/file.txt"
+
+Features:
+✓ Copy single files: --only "config.json"
+✓ Copy entire folders: --only "reports"
+✓ Nested paths: --only "2026/reports/final"
+✓ Works with all modes: --no-copy, --sync
+✓ Combined filtering and sync: --only "folder" --sync
+
+Examples:
+  # Preview specific folder
+  ./compair-standalone-macos ~/src ~/dst --only "documents" --no-copy
+
+  # Copy only reports
+  ./compair-standalone-macos ~/src ~/dst --only "reports"
+
+  # Sync only specific subfolder
+  ./compair-standalone-macos ~/src ~/dst --only "2026" --sync
+
+Use Cases:
+- Copy only configuration files
+- Backup selective project folders
+- Sync specific reports without full dataset
+- Selective cloud synchronization
+- Targeted folder replication
 
 ================================================================================
 NEW IN v1.1.0 - AUTO-STACK OPTIMIZATION & TRUE STANDALONE
@@ -338,7 +412,7 @@ Tested with:
   ✓ Complex symlink scenarios
 
 ================================================================================
-Version: 1.1.0
+Version: 1.2.0
 License: MIT
 Platforms: macOS (ARM64), Linux (x64), Windows (x64)
 

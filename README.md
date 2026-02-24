@@ -59,6 +59,20 @@ Delete ALL files in destination, then copy everything from source. Use with caut
 
 Warning: Sync mode permanently deletes all contents from the destination folder. Only use after backing up or when you're absolutely sure.
 
+### 4. **Filter Mode** (NEW in v1.2.0)
+Copy or sync only specific files or folders instead of everything.
+```bash
+# Copy only a single file
+./bin/compair-single-file /source /destination --only "folder/file.txt"
+
+# Copy only a folder
+./bin/compair-single-file /source /destination --only "foldername"
+
+# Combine with other modes
+./bin/compair-single-file /source /destination --only "folder" --no-copy
+./bin/compair-single-file /source /destination --only "folder" --sync
+```
+
 ## Installation
 
 ### Option 1: Use Pre-Built Executable (Easiest)
@@ -68,6 +82,23 @@ Just download and run the executable from `./bin` or `./COMPAIR` folder.
 ```bash
 npm install
 npm run build
+```
+
+## Command-Line Options
+
+| Flag | Description | Example |
+|------|-------------|---------|
+| `--no-copy` | Preview only, don't copy files | `./compair /src /dst --no-copy` |
+| `--sync` | Full sync: delete all in dest and copy all from src | `./compair /src /dst --sync` |
+| `--only <path>` | Copy/compare only specific file or folder | `./compair /src /dst --only "folder"` |
+
+**Combine flags:**
+```bash
+# Preview + filter (no copy)
+./bin/compair-single-file /source /destination --only "folder" --no-copy
+
+# Sync + filter
+./bin/compair-single-file /source /destination --only "folder" --sync
 ```
 
 ## Complete Usage Guide
@@ -92,6 +123,12 @@ npm run build
 **Full sync - make destination identical to source:**
 ```bash
 ./bin/compair-single-file /Volumes/ExternalDrive ~/cloud-backup --sync
+```
+
+**Copy only specific files/folders:**
+```bash
+./bin/compair-single-file /source /destination --only "subfolder"
+./bin/compair-single-file /source /destination --only "config.json"
 ```
 
 ## Real-World Examples
@@ -255,8 +292,30 @@ fi
 
 ## Troubleshooting
 
+### Filter Specific Files (v1.2.0+)
+
+**Copy only one file:**
+```bash
+./bin/compair-single-file /source /destination --only "path/to/file.txt"
+```
+
+**Copy only a folder and its contents:**
+```bash
+./bin/compair-single-file /source /destination --only "foldername"
+```
+
+**Preview filtered changes (no copy):**
+```bash
+./bin/compair-single-file /source /destination --only "folder" --no-copy
+```
+
+**Sync only specific subset:**
+```bash
+./bin/compair-single-file /source /destination --only "folder" --sync
+```
+
 ### "Maximum call stack size exceeded" with very large directories
-**Good news!** As of v1.1.0, this is handled **automatically**!
+As of v1.1.0, this is handled **automatically**!
 
 The tool now:
 1. **Auto-detects** the number of files in both folders
@@ -311,6 +370,26 @@ chmod +x compair-single-file
 
 ## Version & License
 
-- **Version**: 1.1.0
+- **Version**: 1.2.0
 - **License**: MIT
 - **Status**: Stable and production-ready
+
+## Release Notes
+
+### v1.2.0 (February 2026)
+**New Features:**
+- ✨ **--only flag**: Copy or sync only specific files/folders instead of everything
+  - Copy single files: `--only "folder/file.txt"`
+  - Copy entire folders: `--only "foldername"`
+  - Works with all modes: `--no-copy`, `--sync`
+  - Examples: `./compair /src /dst --only "folder" --sync`
+
+**Improvements:**
+- Enhanced path filtering with cross-platform support (Windows/macOS/Linux)
+- Better console output for filtered operations
+- Comprehensive error handling for edge cases
+
+### v1.1.0 (Previous)
+- Auto-detect and optimize stack size for large directories (100k+ files)
+- Fixed "Maximum call stack size exceeded" errors
+- Standalone executables for all platforms

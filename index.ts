@@ -116,7 +116,8 @@ async function compareFolders(
   folderA: string,
   folderB: string,
   shouldCopy: boolean = true,
-  syncMode: boolean = false
+  syncMode: boolean = false,
+  filterPath: string | null = null
 ): Promise<ComparisonResult> {
   const result: ComparisonResult = {
     folderA,
@@ -143,20 +144,44 @@ async function compareFolders(
 
     // Get list of all files (including nested) from each folder
     console.log(`Scanning source folder (${folderA})...`);
-    const filesA = getAllFilesRecursive(folderA);
+    let filesA = getAllFilesRecursive(folderA);
     console.log(`Found ${filesA.length} files in source folder`);
     
     console.log(`Scanning destination folder (${folderB})...`);
     let filesB = getAllFilesRecursive(folderB);
     console.log(`Found ${filesB.length} files in destination folder`);
+    
+    // Apply filter if --only flag is used
+    if (filterPath) {
+      const normalizedFilter = filterPath.replace(/\\/g, '/');
+      filesA = filesA.filter(f => {
+        const normalized = f.replace(/\\/g, '/');
+        return normalized === normalizedFilter || 
+               normalized.startsWith(normalizedFilter + '/') ||
+               normalizedFilter.startsWith(normalized + '/');
+      });
+      filesB = filesB.filter(f => {
+        const normalized = f.replace(/\\/g, '/');
+        return normalized === normalizedFilter || 
+               normalized.startsWith(normalizedFilter + '/') ||
+               normalizedFilter.startsWith(normalized + '/');
+      });
+      
+      // Only show filtering details if files were found
+      if (filesA.length > 0 || filesB.length > 0) {
+        console.log(`\nFiltering to only include: ${filterPath}`);
+        console.log(`After filtering: ${filesA.length} files in source, ${filesB.length} files in destination\n`);
+      } else {
+        console.log(`\nNote: No files found matching: ${filterPath}\n`);
+      }
+    }
 
     const filesASet = new Set(filesA);
     const filesBSet = new Set(filesB);
 
     // In sync mode, delete all contents from B if folders are different
     if (syncMode && filesB.length > 0) {
-      const isDifferent = filesA.length !== filesB.length || 
-                          !filesA.every(f => filesBSet.has(f));
+      const isDifferent = filesA.length !== filesB.length || !filesA.every(f => filesBSet.has(f));
       
       if (isDifferent) {
         console.log(`Sync mode: Deleting all contents from ${folderB}...\n`);
@@ -405,12 +430,16 @@ async function main(): Promise<void> {
   if (args.length < 2) {
     console.log("Usage: npx ts-node index.ts <folderA> <folderB> [options]");
     console.log("\nOptions:");
-    console.log("  --no-copy    Only compare, don't copy files");
-    console.log("  --sync       Delete all from B and copy all from A (full sync)");
+    console.log("  --no-copy         Only compare, don't copy files");
+    console.log("  --sync            Delete all from B and copy all from A (full sync)");
+    console.log("  --only <path>     Copy only the specified file or folder (relative path)");
     console.log(
-      "\nExample: npx ts-node index.ts ./source ./destination"
+      "\nExamples:"
     );
-    console.log("Example: npx ts-node index.ts ./source ./destination --sync\n");
+    console.log("  npx ts-node index.ts ./source ./destination");
+    console.log("  npx ts-node index.ts ./source ./destination --sync");
+    console.log("  npx ts-node index.ts ./source ./destination --only subfolder/file.txt");
+    console.log("  npx ts-node index.ts ./source ./destination --only subfolder --sync\n");
     process.exit(1);
   }
 
@@ -425,12 +454,22 @@ async function main(): Promise<void> {
 
   const shouldCopy = !args.includes("--no-copy");
   const syncMode = args.includes("--sync");
+  
+  // Parse --only flag
+  let filterPath: string | null = null;
+  const onlyIndex = args.indexOf("--only");
+  if (onlyIndex !== -1 && onlyIndex + 1 < args.length) {
+    filterPath = args[onlyIndex + 1];
+  }
 
   if (syncMode) {
     console.log(`SYNC MODE: Folder B will be replaced with exact copy of Folder A\n`);
   }
+  if (filterPath) {
+    console.log(`FILTER MODE: Only processing path '${filterPath}'\n`);
+  }
   console.log(`Comparing folders...\n`);
-  const result = await compareFolders(folderA, folderB, shouldCopy, syncMode);
+  const result = await compareFolders(folderA, folderB, shouldCopy, syncMode, filterPath);
   printResults(result);
 }
 

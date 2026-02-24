@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 ## [v1.2.0] - February 24, 2026
 
 ### Added
-- ✨ **--only flag**: Filter and copy/sync only specific files or folders
+-  **--only flag**: Filter and copy/sync only specific files or folders
   - Copy single files: `--only "path/to/file.txt"`
   - Copy entire folders: `--only "foldername"`
   - Works with all modes: `--no-copy`, `--sync`
@@ -147,22 +147,22 @@ All notable changes to this project will be documented in this file.
 ## Platform Support
 
 ### v1.2.0
-- ✅ macOS ARM64 (Apple Silicon / M1+) - Standalone executable
-- ✅ Linux x64 (64-bit Intel/AMD) - Standalone executable
-- ✅ Windows x64 (64-bit) - Standalone executable
-- ✅ Node.js 20.0.0+ (any platform)
+- macOS ARM64 (Apple Silicon / M1+) - Standalone executable
+- Linux x64 (64-bit Intel/AMD) - Standalone executable
+- Windows x64 (64-bit) - Standalone executable
+- Node.js 20.0.0+ (any platform)
 
 ### v1.1.0
-- ✅ macOS (Intel & Apple Silicon)
-- ✅ Linux (x64)
-- ✅ Windows (x64)
-- ✅ Node.js 20.0.0+
+- macOS (Intel & Apple Silicon)
+- Linux (x64)
+- Windows (x64)
+- Node.js 20.0.0+
 
 ### v1.0.0
-- ✅ macOS
-- ✅ Linux
-- ✅ Windows
-- ✅ Node.js 20.0.0+
+- macOS
+- Linux
+- Windows
+- Node.js 20.0.0+
 
 ---
 
