@@ -6,12 +6,12 @@ This guide explains how to use and build standalone executables that work
 on any system without requiring Node.js to be installed.
 
 Two distribution options available in COMPAIR/ folder:
-  ✓ compair-standalone-macos (44 MB) - macOS ARM64
-  ✓ compair-standalone-linux (44 MB) - Linux x64
-  ✓ compair-standalone-windows.exe (36 MB) - Windows x64
+  - compair-standalone-macos (44 MB) - macOS ARM64
+  - compair-standalone-linux (44 MB) - Linux x64
+  - compair-standalone-windows.exe (36 MB) - Windows x64
 
 ================================================================================
-🚀 QUICK START - USING STANDALONE EXECUTABLES
+QUICK START - USING STANDALONE EXECUTABLES
 ================================================================================
 
 macOS / Linux:
@@ -24,7 +24,7 @@ Windows:
 That's it! No Node.js installation needed!
 
 ================================================================================
-🔨 HOW TO BUILD STANDALONE EXECUTABLES FOR MULTI-OS
+HOW TO BUILD STANDALONE EXECUTABLES FOR MULTI-OS
 ================================================================================
 
 Prerequisites:
@@ -74,7 +74,7 @@ Step 7: Copy to Distribution Folder
   cp dist/compair-win-x64.exe COMPAIR/compair-standalone-windows.exe
 
 ================================================================================
-📋 COMPLETE BUILD SCRIPT (All in One)
+COMPLETE BUILD SCRIPT (All in One)
 ================================================================================
 
 #!/bin/bash
@@ -107,10 +107,10 @@ cp dist/compair-win-x64.exe COMPAIR/compair-standalone-windows.exe
 echo "Step 8: Verifying..."
 ls -lh COMPAIR/compair-standalone-*
 
-echo "✓ Build complete! Standalone executables ready in COMPAIR/ folder"
+echo "Build complete! Standalone executables ready in COMPAIR/ folder"
 
 ================================================================================
-🎯 USAGE EXAMPLES
+USAGE EXAMPLES
 ================================================================================
 
 Compare and Copy Unique Files:
@@ -122,11 +122,19 @@ Preview Only (Don't Copy):
 Full Sync (DELETE destination, then copy source):
   ./compair-standalone-macos /source /destination --sync
 
+Copy Only Specific File or Folder (NEW in v1.2.0):
+  ./compair-standalone-macos /source /destination --only "folder"
+  ./compair-standalone-macos /source /destination --only "path/to/file.txt"
+
+Combine Flags:
+  ./compair-standalone-macos /source /destination --only "folder" --no-copy
+  ./compair-standalone-macos /source /destination --only "folder" --sync
+
 Show Help:
   ./compair-standalone-macos
 
 ================================================================================
-💾 DEPLOYMENT OPTIONS
+DEPLOYMENT OPTIONS
 ================================================================================
 
 Option 1: Email / USB Drive
@@ -148,7 +156,7 @@ Option 4: Script Distribution
   • Automatic download and execution
 
 ================================================================================
-📊 BUILD DETAILS
+BUILD DETAILS
 ================================================================================
 
 What pkg does:
@@ -172,28 +180,34 @@ Build time per platform: ~2-3 minutes
 Total build time for all 3 platforms: ~10 minutes
 
 ================================================================================
-🔐 SAFETY GUIDE - IMPORTANT!
+SAFETY GUIDE - IMPORTANT!
 ================================================================================
 
-THREE MODES:
+FOUR MODES:
 
 1. SAFE MODE (Default)
    ./compair-standalone-macos /source /destination
-   → Copies unique files only
-   → Your destination files are never deleted
-   → SAFE TO USE ✅
+   - Copies unique files only
+   - Your destination files are never deleted
+   - SAFE TO USE
 
 2. PREVIEW MODE (Safest)
    ./compair-standalone-macos /source /destination --no-copy
-   → Shows what WOULD be done
-   → Nothing is actually copied
-   → SAFEST TO USE ✅
+   - Shows what WOULD be done
+   - Nothing is actually copied
+   - SAFEST TO USE
 
 3. SYNC MODE (Dangerous!)
    ./compair-standalone-macos /source /destination --sync
-   → DELETE ALL files in destination
-   → Then copy everything from source
-   → ONLY USE IF YOU'RE SURE ⚠️
+   - DELETE ALL files in destination
+   - Then copy everything from source
+   - ONLY USE IF YOU'RE SURE
+
+4. FILTER MODE (NEW in v1.2.0)
+   ./compair-standalone-macos /source /destination --only "folder"
+   - Copy/compare only specific file or folder
+   - Combine with other modes
+   - SAFE TO USE
 
 BEST PRACTICE:
 Step 1: Always preview first
@@ -205,8 +219,12 @@ Step 2: If it looks good, do the copy
 Step 3: Only use --sync if you backed up destination
   ./compair-standalone-macos /source /destination --sync
 
+Step 4: Use --only for selective operations
+  ./compair-standalone-macos /source /destination --only "folder"
+  ./compair-standalone-macos /source /destination --only "folder" --no-copy
+
 ================================================================================
-📚 REAL WORLD EXAMPLES
+REAL WORLD EXAMPLES
 ================================================================================
 
 Example 1: Daily Document Backup
@@ -233,8 +251,20 @@ Example 6: Project Sync
 Example 7: Cloud Sync
   ./compair-standalone-macos ~/local-folder ~/cloud-mounted-folder --sync
 
+Example 8: Copy Only Reports Folder (NEW in v1.2.0)
+  ./compair-standalone-macos ~/source ~/destination --only "reports"
+
+Example 9: Copy Single File
+  ./compair-standalone-macos ~/source ~/destination --only "config.json"
+
+Example 10: Preview Specific Folder Before Copying
+  ./compair-standalone-macos ~/source ~/destination --only "documents" --no-copy
+
+Example 11: Sync Specific Subfolder Only
+  ./compair-standalone-macos ~/source ~/destination --only "2026-reports" --sync
+
 ================================================================================
-🆘 TROUBLESHOOTING
+TROUBLESHOOTING
 ================================================================================
 
 Problem: "command not found"
@@ -267,7 +297,7 @@ Solution:
   • You don't need to do anything - it's automatic!
 
 ================================================================================
-💡 PRO TIPS
+PRO TIPS
 ================================================================================
 
 Tip 1: Create an Alias
@@ -295,7 +325,7 @@ Tip 5: Use in Scripts
   fi
 
 ================================================================================
-✅ VERIFICATION STEPS FOR BUILD
+VERIFICATION STEPS FOR BUILD
 ================================================================================
 
 After building, verify everything:
@@ -324,7 +354,7 @@ Step 6: You're Ready to Distribute!
   Copy executables to COMPAIR/ folder
 
 ================================================================================
-🎯 CROSS-PLATFORM BUILD NOTES
+CROSS-PLATFORM BUILD NOTES
 ================================================================================
 
 Building from macOS:
@@ -348,41 +378,48 @@ Best practice:
   • Ensures all platforms built correctly
 
 ================================================================================
-📦 WHAT'S INCLUDED IN STANDALONE EXECUTABLE
+WHAT'S INCLUDED IN STANDALONE EXECUTABLE
 ================================================================================
 
 Inside each 36-44 MB executable:
-  ✓ Full Node.js 18 runtime
-  ✓ Application code (bundled)
-  ✓ All dependencies (fs, path, child_process, v8)
-  ✓ Auto-stack optimization logic
-  ✓ Large directory detection & handling
+  - Full Node.js 18 runtime
+  - Application code (bundled)
+  - All dependencies (fs, path, child_process, v8)
+  - Auto-stack optimization logic
+  - Large directory detection & handling
 
 Nothing else needed!
 
 ================================================================================
-🎉 SUMMARY
+SUMMARY
 ================================================================================
 
 You now have:
-✓ Clean root directory with source files only
-✓ Updated SINGLE_FILE_GUIDE.txt with build instructions
-✓ Three standalone executables in COMPAIR/ folder
-✓ Ready for multi-OS distribution
-✓ Auto-optimized for large directories (100k+ files)
-✓ Complete independence from system dependencies
+- Clean root directory with source files only
+- Updated SINGLE_FILE_GUIDE.txt with build instructions
+- Three standalone executables in COMPAIR/ folder
+- Ready for multi-OS distribution
+- Auto-optimized for large directories (100k+ files)
+- Complete independence from system dependencies
 
 To rebuild anytime:
   npm install && npm run build && npm run bundle && pkg dist/bundled/index.js --targets node18-macos-arm64,node18-linux-x64,node18-win-x64 --output dist/compair && chmod +x dist/compair-* && cp dist/compair-* COMPAIR/
 
-That's it! Ready to distribute to any platform! 🚀
+That's it! Ready to distribute to any platform!
 
 ================================================================================
-Version: 1.1.0
+Version: 1.2.0
 License: MIT
 Platforms: macOS (ARM64), Linux (x64), Windows (x64)
 Node.js bundled: Yes (no installation needed)
 File Size: 36-44 MB per platform
 Build Tool: pkg
-Latest Update: Feb 23, 2026
+Latest Update: Feb 24, 2026
+
+FEATURES IN v1.2.0:
+- --only flag for selective file/folder copying
+- Auto-stack optimization for 100k+ files
+- Cross-platform standalone executables
+- Graceful error handling for missing filters
+- Enhanced path normalization (Windows/macOS/Linux)
 ================================================================================
