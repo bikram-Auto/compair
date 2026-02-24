@@ -53,67 +53,63 @@ function deleteFolderContentsRecursive(folderPath: string): string[] {
 /**
  * Recursively get all files from a folder and its nested subfolders
  * Returns relative paths from the root folder (e.g., "subfolder/file.txt")
- * Optimized to handle large directories (100k+ files) without stack overflow
+ * Uses iterative approach to avoid deep recursion stack overflow
  */
 function getAllFilesRecursive(
-  folderPath: string,
+  startPath: string,
   relativePath: string = "",
   visitedPaths: Set<string> = new Set(),
   maxDepth: number = 100,
   currentDepth: number = 0
 ): string[] {
-  const files: string[] = [];
+  const allFiles: string[] = [];
+  const queue: Array<{folderPath: string; relPath: string; depth: number}> = [
+    {folderPath: startPath, relPath: "", depth: 0}
+  ];
+  const visited = new Set<string>();
 
-  // Prevent infinite recursion and limit depth
-  if (currentDepth > maxDepth) {
-    return files;
-  }
+  while (queue.length > 0) {
+    const {folderPath, relPath, depth} = queue.shift()!;
 
-  // Prevent circular references using the folder path as-is
-  if (visitedPaths.has(folderPath)) {
-    return files;
-  }
-  visitedPaths.add(folderPath);
-
-  try {
-    const entries = fs.readdirSync(folderPath);
-
-    for (const entry of entries) {
-      const fullPath = path.join(folderPath, entry);
-      const relPath = relativePath ? path.join(relativePath, entry) : entry;
-
-      try {
-        const stat = fs.lstatSync(fullPath);
-        
-        if (stat.isFile()) {
-          files.push(relPath);
-        } else if (stat.isDirectory() && !stat.isSymbolicLink()) {
-          // Skip symbolic link directories to prevent circular references
-          // Recursively get files from subdirectories
-          try {
-            const nestedFiles = getAllFilesRecursive(
-              fullPath,
-              relPath,
-              new Set(visitedPaths),
-              maxDepth,
-              currentDepth + 1
-            );
-            files.push(...nestedFiles);
-          } catch (error) {
-            // Skip subdirectories that cause errors
-            continue;
-          }
-        }
-      } catch (error) {
-        // Skip individual entries that have issues (with error tolerance)
-        continue;
-      }
+    // Prevent infinite recursion and limit depth
+    if (depth > maxDepth) {
+      continue;
     }
-  } catch (error) {
-    // If we can't read the directory, just return what we have
-  }
 
-  return files;
+    // Prevent circular references
+    if (visited.has(folderPath)) {
+      continue;
+    }
+    visited.add(folderPath);
+
+    try {
+      const entries = fs.readdirSync(folderPath);
+
+      for (const entry of entries) {
+        const fullPath = path.join(folderPath, entry);
+        const entRelPath = relPath ? path.join(relPath, entry) : entry;
+
+        try {
+          const stat = fs.lstatSync(fullPath);
+
+          if (stat.isFile()) {
+            allFiles.push(entRelPath);
+          } else if (stat.isDirectory() && !stat.isSymbolicLink()) {
+            // Add to queue instead of recursive call
+            queue.push({folderPath: fullPath, relPath: entRelPath, depth: depth + 1});
+          }
+        } catch (error) {
+          // Skip individual entries that have issues
+          continue;
+        }
+      }
+    } catch (error) {
+      // If we can't read the directory, continue with next item
+      continue;
+    }
+  }
+  
+  return allFiles;
 }
 
 async function compareFolders(
@@ -319,8 +315,8 @@ function calculateRequiredStackSize(estimatedFileCount: number): number {
 async function ensureSufficientStackSize(folderA: string, folderB: string): Promise<boolean> {
   // Quick estimate of file count (sampling first 2 levels only)
   console.log("Analyzing folder structure...");
-  const estimatedFilesA = estimateFileCount(folderA, 2);
-  const estimatedFilesB = estimateFileCount(folderB, 2);
+  const estimatedFilesA = estimateFileCount(folderA, 4);
+  const estimatedFilesB = estimateFileCount(folderB, 4);
   const totalEstimated = estimatedFilesA + estimatedFilesB;
   
   const requiredStack = calculateRequiredStackSize(totalEstimated);
@@ -360,9 +356,33 @@ async function ensureSufficientStackSize(folderA: string, folderB: string): Prom
     const stackArg = `--stack-size=${Math.max(4096, requiredStack * 4)}`;
     
     // Spawn with memory arguments
-    const child = spawn(process.execPath, [memoryArg, stackArg, ...process.argv.slice(1)], {
+    const isTsNode =
+      process.argv[1]?.includes("ts-node") ||
+      process.argv[1]?.endsWith(".ts");
+
+    let spawnArgs: string[];
+
+    if (isTsNode) {
+      // If running via ts-node, relaunch via ts-node again
+      spawnArgs = [
+        memoryArg,
+        stackArg,
+        require.resolve("ts-node/dist/bin.js"),
+        process.argv[1],
+        ...process.argv.slice(2),
+      ];
+    } else {
+      // Normal JS or pkg
+      spawnArgs = [
+        memoryArg,
+        stackArg,
+        ...process.argv.slice(1),
+      ];
+    }
+
+    const child = spawn(process.execPath, spawnArgs, {
       env,
-      stdio: "inherit"
+      stdio: "inherit",
     });
     
     child.on("exit", (code) => {

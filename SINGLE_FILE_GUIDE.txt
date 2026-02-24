@@ -93,9 +93,7 @@ echo "Step 4: Installing pkg globally..."
 npm install -g pkg
 
 echo "Step 5: Building standalone executables for all platforms..."
-pkg dist/bundled/index.js \
-  --targets node18-macos-arm64,node18-linux-x64,node18-win-x64 \
-  --output dist/compair
+pkg dist/bundled/index.js --targets node18-macos-arm64,node18-linux-x64,node18-win-x64 --output standalone-compair/compair
 
 echo "Step 6: Making files executable..."
 chmod +x dist/compair-macos-arm64
