@@ -53,74 +53,71 @@ function deleteFolderContentsRecursive(folderPath: string): string[] {
 /**
  * Recursively get all files from a folder and its nested subfolders
  * Returns relative paths from the root folder (e.g., "subfolder/file.txt")
- * Optimized to handle large directories (100k+ files) without stack overflow
+ * Uses iterative approach to avoid deep recursion stack overflow
  */
 function getAllFilesRecursive(
-  folderPath: string,
+  startPath: string,
   relativePath: string = "",
   visitedPaths: Set<string> = new Set(),
   maxDepth: number = 100,
   currentDepth: number = 0
 ): string[] {
-  const files: string[] = [];
+  const allFiles: string[] = [];
+  const queue: Array<{folderPath: string; relPath: string; depth: number}> = [
+    {folderPath: startPath, relPath: "", depth: 0}
+  ];
+  const visited = new Set<string>();
 
-  // Prevent infinite recursion and limit depth
-  if (currentDepth > maxDepth) {
-    return files;
-  }
+  while (queue.length > 0) {
+    const {folderPath, relPath, depth} = queue.shift()!;
 
-  // Prevent circular references using the folder path as-is
-  if (visitedPaths.has(folderPath)) {
-    return files;
-  }
-  visitedPaths.add(folderPath);
-
-  try {
-    const entries = fs.readdirSync(folderPath);
-
-    for (const entry of entries) {
-      const fullPath = path.join(folderPath, entry);
-      const relPath = relativePath ? path.join(relativePath, entry) : entry;
-
-      try {
-        const stat = fs.lstatSync(fullPath);
-        
-        if (stat.isFile()) {
-          files.push(relPath);
-        } else if (stat.isDirectory() && !stat.isSymbolicLink()) {
-          // Skip symbolic link directories to prevent circular references
-          // Recursively get files from subdirectories
-          try {
-            const nestedFiles = getAllFilesRecursive(
-              fullPath,
-              relPath,
-              new Set(visitedPaths),
-              maxDepth,
-              currentDepth + 1
-            );
-            files.push(...nestedFiles);
-          } catch (error) {
-            // Skip subdirectories that cause errors
-            continue;
-          }
-        }
-      } catch (error) {
-        // Skip individual entries that have issues (with error tolerance)
-        continue;
-      }
+    // Prevent infinite recursion and limit depth
+    if (depth > maxDepth) {
+      continue;
     }
-  } catch (error) {
-    // If we can't read the directory, just return what we have
-  }
 
-  return files;
+    // Prevent circular references
+    if (visited.has(folderPath)) {
+      continue;
+    }
+    visited.add(folderPath);
+
+    try {
+      const entries = fs.readdirSync(folderPath);
+
+      for (const entry of entries) {
+        const fullPath = path.join(folderPath, entry);
+        const entRelPath = relPath ? path.join(relPath, entry) : entry;
+
+        try {
+          const stat = fs.lstatSync(fullPath);
+
+          if (stat.isFile()) {
+            allFiles.push(entRelPath);
+          } else if (stat.isDirectory() && !stat.isSymbolicLink()) {
+            // Add to queue instead of recursive call
+            queue.push({folderPath: fullPath, relPath: entRelPath, depth: depth + 1});
+          }
+        } catch (error) {
+          // Skip individual entries that have issues
+          continue;
+        }
+      }
+    } catch (error) {
+      // If we can't read the directory, continue with next item
+      continue;
+    }
+  }
+  
+  return allFiles;
 }
 
 async function compareFolders(
   folderA: string,
   folderB: string,
   shouldCopy: boolean = true,
-  syncMode: boolean = false
+  syncMode: boolean = false,
+  filterPath: string | null = null
 ): Promise<ComparisonResult> {
   const result: ComparisonResult = {
     folderA,
@@ -147,20 +144,44 @@ async function compareFolders(
 
     // Get list of all files (including nested) from each folder
     console.log(`Scanning source folder (${folderA})...`);
-    const filesA = getAllFilesRecursive(folderA);
+    let filesA = getAllFilesRecursive(folderA);
     console.log(`Found ${filesA.length} files in source folder`);
     
     console.log(`Scanning destination folder (${folderB})...`);
     let filesB = getAllFilesRecursive(folderB);
     console.log(`Found ${filesB.length} files in destination folder`);
+    
+    // Apply filter if --only flag is used
+    if (filterPath) {
+      const normalizedFilter = filterPath.replace(/\\/g, '/');
+      filesA = filesA.filter(f => {
+        const normalized = f.replace(/\\/g, '/');
+        return normalized === normalizedFilter || 
+               normalized.startsWith(normalizedFilter + '/') ||
+               normalizedFilter.startsWith(normalized + '/');
+      });
+      filesB = filesB.filter(f => {
+        const normalized = f.replace(/\\/g, '/');
+        return normalized === normalizedFilter || 
+               normalized.startsWith(normalizedFilter + '/') ||
+               normalizedFilter.startsWith(normalized + '/');
+      });
+      
+      // Only show filtering details if files were found
+      if (filesA.length > 0 || filesB.length > 0) {
+        console.log(`\nFiltering to only include: ${filterPath}`);
+        console.log(`After filtering: ${filesA.length} files in source, ${filesB.length} files in destination\n`);
+      } else {
+        console.log(`\nNote: No files found matching: ${filterPath}\n`);
+      }
+    }
 
     const filesASet = new Set(filesA);
     const filesBSet = new Set(filesB);
 
     // In sync mode, delete all contents from B if folders are different
     if (syncMode && filesB.length > 0) {
-      const isDifferent = filesA.length !== filesB.length || 
-                          !filesA.every(f => filesBSet.has(f));
+      const isDifferent = filesA.length !== filesB.length || !filesA.every(f => filesBSet.has(f));
       
       if (isDifferent) {
         console.log(`Sync mode: Deleting all contents from ${folderB}...\n`);
@@ -319,8 +340,8 @@ function calculateRequiredStackSize(estimatedFileCount: number): number {
 async function ensureSufficientStackSize(folderA: string, folderB: string): Promise<boolean> {
   // Quick estimate of file count (sampling first 2 levels only)
   console.log("Analyzing folder structure...");
-  const estimatedFilesA = estimateFileCount(folderA, 2);
-  const estimatedFilesB = estimateFileCount(folderB, 2);
+  const estimatedFilesA = estimateFileCount(folderA, 4);
+  const estimatedFilesB = estimateFileCount(folderB, 4);
   const totalEstimated = estimatedFilesA + estimatedFilesB;
   
   const requiredStack = calculateRequiredStackSize(totalEstimated);
@@ -339,22 +360,63 @@ async function ensureSufficientStackSize(folderA: string, folderB: string): Prom
     return false;
   }
   
-  // Spawn a new process with increased stack size using current executable
-  console.log("Relaunching with optimized stack size...\n");
+  // Detect if running as a pkg executable vs regular Node.js
+  const isPackaged = (process as any).pkg !== undefined;
+  
+  if (isPackaged) {
+    // For pkg executables, we cannot respawn with Node.js flags
+    // The bundled Node.js should have sufficient memory for most directories
+    // Continue processing with available memory
+    console.log("Running as standalone executable (pkg). Using available memory.\n");
+    return false;
+  }
+  
+  // For regular Node.js, spawn with increased memory
+  console.log("Relaunching with optimized memory allocation...\n");
   
   return new Promise((resolve) => {
     const env = { ...process.env, COMPAIR_STACK_SIZE_ADJUSTED: "true" };
-    const stackSizeArg = `--stack-size=${Math.max(1024, requiredStack)}`;
+    const maxOldSpaceSize = Math.max(2048, requiredStack * 2);
+    const memoryArg = `--max-old-space-size=${maxOldSpaceSize}`;
+    const stackArg = `--stack-size=${Math.max(4096, requiredStack * 4)}`;
     
-    // Spawn self (current executable) with increased stack size
-    // process.argv[1] is the current script being executed
-    const child = spawn(process.execPath, [stackSizeArg, process.argv[1], ...process.argv.slice(2)], {
+    // Spawn with memory arguments
+    const isTsNode =
+      process.argv[1]?.includes("ts-node") ||
+      process.argv[1]?.endsWith(".ts");
+
+    let spawnArgs: string[];
+
+    if (isTsNode) {
+      // If running via ts-node, relaunch via ts-node again
+      spawnArgs = [
+        memoryArg,
+        stackArg,
+        require.resolve("ts-node/dist/bin.js"),
+        process.argv[1],
+        ...process.argv.slice(2),
+      ];
+    } else {
+      // Normal JS or pkg
+      spawnArgs = [
+        memoryArg,
+        stackArg,
+        ...process.argv.slice(1),
+      ];
+    }
+
+    const child = spawn(process.execPath, spawnArgs, {
       env,
-      stdio: "inherit"
+      stdio: "inherit",
     });
     
     child.on("exit", (code) => {
       process.exit(code || 0);
+    });
+    
+    child.on("error", (err) => {
+      console.error("Error during respawn:", err);
+      process.exit(1);
     });
     
     resolve(true);
@@ -368,12 +430,16 @@ async function main(): Promise<void> {
   if (args.length < 2) {
     console.log("Usage: npx ts-node index.ts <folderA> <folderB> [options]");
     console.log("\nOptions:");
-    console.log("  --no-copy    Only compare, don't copy files");
-    console.log("  --sync       Delete all from B and copy all from A (full sync)");
+    console.log("  --no-copy         Only compare, don't copy files");
+    console.log("  --sync            Delete all from B and copy all from A (full sync)");
+    console.log("  --only <path>     Copy only the specified file or folder (relative path)");
     console.log(
-      "\nExample: npx ts-node index.ts ./source ./destination"
+      "\nExamples:"
     );
-    console.log("Example: npx ts-node index.ts ./source ./destination --sync\n");
+    console.log("  npx ts-node index.ts ./source ./destination");
+    console.log("  npx ts-node index.ts ./source ./destination --sync");
+    console.log("  npx ts-node index.ts ./source ./destination --only subfolder/file.txt");
+    console.log("  npx ts-node index.ts ./source ./destination --only subfolder --sync\n");
     process.exit(1);
   }
 
@@ -388,12 +454,22 @@ async function main(): Promise<void> {
 
   const shouldCopy = !args.includes("--no-copy");
   const syncMode = args.includes("--sync");
+  
+  // Parse --only flag
+  let filterPath: string | null = null;
+  const onlyIndex = args.indexOf("--only");
+  if (onlyIndex !== -1 && onlyIndex + 1 < args.length) {
+    filterPath = args[onlyIndex + 1];
+  }
 
   if (syncMode) {
     console.log(`SYNC MODE: Folder B will be replaced with exact copy of Folder A\n`);
   }
+  if (filterPath) {
+    console.log(`FILTER MODE: Only processing path '${filterPath}'\n`);
+  }
   console.log(`Comparing folders...\n`);
-  const result = await compareFolders(folderA, folderB, shouldCopy, syncMode);
+  const result = await compareFolders(folderA, folderB, shouldCopy, syncMode, filterPath);
   printResults(result);
 }
 
