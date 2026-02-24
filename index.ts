@@ -339,22 +339,39 @@ async function ensureSufficientStackSize(folderA: string, folderB: string): Prom
     return false;
   }
   
-  // Spawn a new process with increased stack size using current executable
-  console.log("Relaunching with optimized stack size...\n");
+  // Detect if running as a pkg executable vs regular Node.js
+  const isPackaged = (process as any).pkg !== undefined;
+  
+  if (isPackaged) {
+    // For pkg executables, we cannot respawn with Node.js flags
+    // The bundled Node.js should have sufficient memory for most directories
+    // Continue processing with available memory
+    console.log("Running as standalone executable (pkg). Using available memory.\n");
+    return false;
+  }
+  
+  // For regular Node.js, spawn with increased memory
+  console.log("Relaunching with optimized memory allocation...\n");
   
   return new Promise((resolve) => {
     const env = { ...process.env, COMPAIR_STACK_SIZE_ADJUSTED: "true" };
-    const stackSizeArg = `--stack-size=${Math.max(1024, requiredStack)}`;
+    const maxOldSpaceSize = Math.max(2048, requiredStack * 2);
+    const memoryArg = `--max-old-space-size=${maxOldSpaceSize}`;
+    const stackArg = `--stack-size=${Math.max(4096, requiredStack * 4)}`;
     
-    // Spawn self (current executable) with increased stack size
-    // process.argv[1] is the current script being executed
-    const child = spawn(process.execPath, [stackSizeArg, process.argv[1], ...process.argv.slice(2)], {
+    // Spawn with memory arguments
+    const child = spawn(process.execPath, [memoryArg, stackArg, ...process.argv.slice(1)], {
       env,
       stdio: "inherit"
     });
     
     child.on("exit", (code) => {
       process.exit(code || 0);
+    });
+    
+    child.on("error", (err) => {
+      console.error("Error during respawn:", err);
+      process.exit(1);
     });
     
     resolve(true);
