@@ -29,7 +29,7 @@ chmod +x ./bin/compair-single-file
 
 ## Download Pre-Built Executables
 
-### 🚀 Download Standalone Files (v1.2.0)
+### Download Standalone Files (v1.2.0)
 **[Download Standalone Compair v1.2.0](https://github.com/bikram-Auto/compair/releases/download/v1.2.0/standalone-compair_v1.2.0.zip)**
 
 Extract the ZIP file and choose your platform:
