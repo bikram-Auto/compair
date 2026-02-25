@@ -177,18 +177,40 @@ async function compareFolders(
     }
 
     const filesASet = new Set(filesA);
-    const filesBSet = new Set(filesB);
+    let filesBSet = new Set(filesB);
 
-    // In sync mode, delete all contents from B if folders are different
-    if (syncMode && filesB.length > 0) {
-      const isDifferent = filesA.length !== filesB.length || !filesA.every(f => filesBSet.has(f));
-      
-      if (isDifferent) {
-        console.log(`Sync mode: Deleting all contents from ${folderB}...\n`);
-        const deleted = deleteFolderContentsRecursive(folderB);
-        result.deletedFiles = deleted;
-        filesB = []; // Reset filesB after deletion
-        deleted.forEach((file) => console.log(` Deleted: ${file}`));
+    // In sync mode, delete destination contents to mirror source
+    if (syncMode) {
+      if (filterPath) {
+        // When using --only, delete only the target subpath inside folderB
+        const targetDest = path.join(folderB, filterPath);
+        if (fs.existsSync(targetDest)) {
+          console.log(`Sync mode (only): Deleting contents of ${targetDest}...\n`);
+          const deleted = deleteFolderContentsRecursive(targetDest);
+          result.deletedFiles = result.deletedFiles.concat(deleted);
+
+          // Remove any entries from filesB that were under the filtered path
+          const normalizedFilter = filterPath.replace(/\\/g, '/');
+          filesB = filesB.filter((f) => {
+            const normalized = f.replace(/\\/g, '/');
+            return !(normalized === normalizedFilter || normalized.startsWith(normalizedFilter + '/'));
+          });
+
+          // Recreate the filesBSet to reflect deletions
+          filesBSet = new Set(filesB);
+          deleted.forEach((file) => console.log(` Deleted: ${file}`));
+        }
+      } else {
+        // Full sync: compare and delete entire destination if different
+        const isDifferent = filesA.length !== filesB.length || !filesA.every(f => filesBSet.has(f));
+        if (isDifferent) {
+          console.log(`Sync mode: Deleting all contents from ${folderB}...\n`);
+          const deleted = deleteFolderContentsRecursive(folderB);
+          result.deletedFiles = result.deletedFiles.concat(deleted);
+          filesB = []; // Reset filesB after deletion
+          filesBSet = new Set(filesB);
+          deleted.forEach((file) => console.log(` Deleted: ${file}`));
+        }
       }
     }
 
