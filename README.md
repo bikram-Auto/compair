@@ -29,6 +29,17 @@ chmod +x ./bin/compair-single-file
 
 ## Download Pre-Built Executables
 
+### 🚀 Download Standalone Files (v1.2.0)
+**[Download Standalone Compair v1.2.0](https://github.com/bikram-Auto/compair/releases/download/v1.2.0/standalone-compair_v1.2.0.zip)**
+
+Extract the ZIP file and choose your platform:
+- **macOS (ARM64)**: `compair-macos-arm64` - For Apple Silicon Macs
+- **Linux (x64)**: `compair-linux-x64` - For Linux systems
+- **Windows (x64)**: `compair-win-x64.exe` - For Windows systems
+
+For detailed setup instructions, see [GUIDE.txt](./standalone-compair/GUIDE.txt) included in the release.
+
+### Local Files
 All executables are in the `./bin` or `./COMPAIR` directory:
 
 - **compair-single-file** (7.8 KB) - RECOMMENDED for macOS/Linux
@@ -378,7 +389,7 @@ chmod +x compair-single-file
 
 ### v1.2.0 (February 2026)
 **New Features:**
-- ✨ **--only flag**: Copy or sync only specific files/folders instead of everything
+-  **`--only flag`**: Copy or sync only specific files/folders instead of everything
   - Copy single files: `--only "folder/file.txt"`
   - Copy entire folders: `--only "foldername"`
   - Works with all modes: `--no-copy`, `--sync`
