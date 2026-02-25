@@ -142,6 +142,17 @@ async function compareFolders(
       return result;
     }
 
+    // SYNC MODE: Delete destination first, before any other operations
+    if (syncMode) {
+      console.log(`Sync mode: Deleting all contents from ${folderB} first...\n`);
+      const deleted = deleteFolderContentsRecursive(folderB);
+      result.deletedFiles = deleted;
+      deleted.forEach((file) => console.log(` Deleted: ${file}`));
+      if (deleted.length > 0) {
+        console.log();
+      }
+    }
+
     // Get list of all files (including nested) from each folder
     console.log(`Scanning source folder (${folderA})...`);
     let filesA = getAllFilesRecursive(folderA);
@@ -177,20 +188,7 @@ async function compareFolders(
     }
 
     const filesASet = new Set(filesA);
-    const filesBSet = new Set(filesB);
-
-    // In sync mode, delete all contents from B if folders are different
-    if (syncMode && filesB.length > 0) {
-      const isDifferent = filesA.length !== filesB.length || !filesA.every(f => filesBSet.has(f));
-      
-      if (isDifferent) {
-        console.log(`Sync mode: Deleting all contents from ${folderB}...\n`);
-        const deleted = deleteFolderContentsRecursive(folderB);
-        result.deletedFiles = deleted;
-        filesB = []; // Reset filesB after deletion
-        deleted.forEach((file) => console.log(` Deleted: ${file}`));
-      }
-    }
+    let filesBSet = new Set(filesB);
 
     // Find unique and common files
     for (const file of filesA) {
