@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import * as fs from "fs";
 import * as path from "path";
 import { spawn } from "child_process";
@@ -13,6 +11,60 @@ interface ComparisonResult {
   copiedFiles: string[];
   deletedFiles: string[];
   errors: string[];
+}
+
+interface CliOptions {
+  folderA: string | null;
+  folderB: string | null;
+  configPath: string | null;
+  shouldCopy: boolean;
+  syncMode: boolean;
+  filterPath: string | null;
+}
+
+interface Mapping {
+  source: string;
+  destinations: string[];
+}
+
+interface DistributionConfig {
+  mappings: Mapping[];
+}
+
+function parseArguments(args: string[]): CliOptions {
+  const configIndex = args.indexOf("--config");
+  const onlyIndex = args.indexOf("--only");
+
+  let configPath: string | null = null;
+  let folderA: string | null = null;
+  let folderB: string | null = null;
+  let filterPath: string | null = null;
+
+  if (configIndex !== -1 && configIndex + 1 < args.length) {
+    configPath = args[configIndex + 1];
+  }
+
+  if (onlyIndex !== -1 && onlyIndex + 1 < args.length) {
+    filterPath = args[onlyIndex + 1];
+  }
+
+  const shouldCopy = !args.includes("--no-copy");
+  const syncMode = args.includes("--sync");
+
+  // If no config, expect first two args to be folders
+  if (!configPath) {
+    folderA = args[0] || null;
+    folderB = args[1] || null;
+  }
+
+  return {
+    folderA,
+    folderB,
+    configPath,
+    shouldCopy,
+    syncMode,
+    filterPath,
+  };
 }
 
 /**
@@ -421,53 +473,155 @@ async function ensureSufficientStackSize(folderA: string, folderB: string): Prom
   });
 }
 
-// Main execution
-async function main(): Promise<void> {
-  const args = process.argv.slice(2);
-
-  if (args.length < 2) {
-    console.log("Usage: npx ts-node index.ts <folderA> <folderB> [options]");
-    console.log("\nOptions:");
-    console.log("  --no-copy         Only compare, don't copy files");
-    console.log("  --sync            Delete all from B and copy all from A (full sync)");
-    console.log("  --only <path>     Copy only the specified file or folder (relative path)");
-    console.log(
-      "\nExamples:"
-    );
-    console.log("  npx ts-node index.ts ./source ./destination");
-    console.log("  npx ts-node index.ts ./source ./destination --sync");
-    console.log("  npx ts-node index.ts ./source ./destination --only subfolder/file.txt");
-    console.log("  npx ts-node index.ts ./source ./destination --only subfolder --sync\n");
+async function processConfigMode(
+  configPath: string,
+  options: CliOptions
+): Promise<void> {
+  if (!fs.existsSync(configPath)) {
+    console.error(`Config file not found: ${configPath}`);
     process.exit(1);
   }
 
-  const folderA = args[0];
-  const folderB = args[1];
-  
-  // Auto-detect and adjust stack size if needed
+  let config: DistributionConfig;
+
+  try {
+    const raw = fs.readFileSync(configPath, "utf-8");
+    config = JSON.parse(raw);
+  } catch {
+    console.error("Invalid JSON config file.");
+    process.exit(1);
+  }
+
+  if (!Array.isArray(config.mappings)) {
+    console.error("Invalid config format: 'mappings' must be an array.");
+    process.exit(1);
+  }
+
+  console.log(`CONFIG MODE: Processing ${config.mappings.length} mapping(s)\n`);
+
+  for (const mapping of config.mappings) {
+    const { source, destinations } = mapping;
+
+    if (!source || !Array.isArray(destinations)) {
+      console.warn("Skipping invalid mapping entry.");
+      continue;
+    }
+
+    if (!fs.existsSync(source)) {
+      console.warn(`Source does not exist: ${source}`);
+      continue;
+    }
+
+    const sourceStat = fs.lstatSync(source);
+    const isFileSource = sourceStat.isFile();
+
+    for (const dest of destinations) {
+      console.log("--------------------------------------------------");
+      console.log(`Source      : ${source}`);
+      console.log(`Destination : ${dest}`);
+      console.log("--------------------------------------------------\n");
+
+      // Determine final destination directory
+      const destDir = isFileSource
+        ? (path.extname(dest) ? path.dirname(dest) : dest)
+        : dest;
+
+      // Ensure destination directory exists
+      if (!fs.existsSync(destDir)) {
+        console.log(`Creating destination directory: ${destDir}`);
+        fs.mkdirSync(destDir, { recursive: true });
+      }
+
+      // 🔥 TRUE SYNC BEHAVIOUR (for both file & folder)
+      if (options.syncMode) {
+        console.log(`Sync mode: Clearing destination directory: ${destDir}`);
+        deleteFolderContentsRecursive(destDir);
+      }
+
+      // ===============================
+      // FILE SOURCE MODE
+      // ===============================
+      if (isFileSource) {
+        const fileName = path.basename(source);
+        const finalDest = path.extname(dest)
+          ? dest
+          : path.join(destDir, fileName);
+
+        if (options.shouldCopy) {
+          try {
+            fs.copyFileSync(source, finalDest);
+            console.log(`✓ Copied file: ${source} → ${finalDest}`);
+          } catch (err) {
+            console.error(`✗ Failed to copy ${source} → ${finalDest}`);
+          }
+        } else {
+          console.log(`Preview: ${source} → ${finalDest}`);
+        }
+
+        continue;
+      }
+
+      // ===============================
+      // FOLDER SOURCE MODE
+      // ===============================
+
+      const respawned = await ensureSufficientStackSize(source, destDir);
+      if (respawned) return;
+
+      const result = await compareFolders(
+        source,
+        destDir,
+        options.shouldCopy,
+        false,                // sync already handled manually
+        options.filterPath
+      );
+
+      printResults(result);
+    }
+  }
+}
+
+// Main execution
+async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+  const options = parseArguments(args);
+
+  if (!options.configPath && (!options.folderA || !options.folderB)) {
+    console.log("Usage:");
+    console.log("  compair <folderA> <folderB> [options]");
+    console.log("  compair --config <config.json> [options]");
+    process.exit(1);
+  }
+
+  if (options.configPath) {
+    await processConfigMode(options.configPath, options);
+    return;
+  }
+
+  const folderA = options.folderA!;
+  const folderB = options.folderB!;
+
   const respawned = await ensureSufficientStackSize(folderA, folderB);
-  if (respawned) {
-    return; // Process has been respawned, exit this one
-  }
+  if (respawned) return;
 
-  const shouldCopy = !args.includes("--no-copy");
-  const syncMode = args.includes("--sync");
-  
-  // Parse --only flag
-  let filterPath: string | null = null;
-  const onlyIndex = args.indexOf("--only");
-  if (onlyIndex !== -1 && onlyIndex + 1 < args.length) {
-    filterPath = args[onlyIndex + 1];
-  }
-
-  if (syncMode) {
+  if (options.syncMode) {
     console.log(`SYNC MODE: Folder B will be replaced with exact copy of Folder A\n`);
   }
-  if (filterPath) {
-    console.log(`FILTER MODE: Only processing path '${filterPath}'\n`);
+
+  if (options.filterPath) {
+    console.log(`FILTER MODE: Only processing path '${options.filterPath}'\n`);
   }
+
   console.log(`Comparing folders...\n`);
-  const result = await compareFolders(folderA, folderB, shouldCopy, syncMode, filterPath);
+
+  const result = await compareFolders(
+    folderA,
+    folderB,
+    options.shouldCopy,
+    options.syncMode,
+    options.filterPath
+  );
+
   printResults(result);
 }
 
