@@ -27,7 +27,7 @@ keeping environments aligned.
 
 Latest Release: v1.3.0
 
-**[Download Standalone Compair v1.3.0](https://github.com/bikram-Auto/compair/releases/download/v1.3.0/standalone-compare_v1.3.0.zip)**
+**[Download Standalone Compair v1.3.0](https://github.com/bikram-Auto/compare/releases/download/v1.3.0/standalone-compare_v1.3.0.zip)**
 
 
 Choose your platform:
